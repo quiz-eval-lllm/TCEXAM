@@ -13,13 +13,10 @@
 .phpunit.cache
 .phpunit.result.cache
 .vscode
-admin/config/
 composer.lock
 ecs.php
 phpunit.xml
-public/config/
 rector.php
-shared/config/
 target
 vendor
 phpstan.neon
