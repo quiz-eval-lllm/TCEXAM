@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Upload PDF endpoint
-            $url = "http://localhost:8080/api/v1/upload_pdf";
+            $url = "http://34.16.76.175:8080/api/v1/upload_pdf";
 
             // Initialize cURL
             $ch = curl_init();
@@ -192,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($ch === false) {
                 die('Failed to initialize cURL session');
             }
-            curl_setopt($ch, CURLOPT_URL, 'http://localhost:8080/api/v1/quiz/package');
+            curl_setopt($ch, CURLOPT_URL, 'http://34.16.76.175:8080/api/v1/quiz/package');
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($queryData));
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
