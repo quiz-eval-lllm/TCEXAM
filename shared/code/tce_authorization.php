@@ -86,7 +86,7 @@ if ($rs = F_db_query($sqls, $db)) {
         $cookie_now_time = time(); // note: while time() function returns a 32 bit integer, it works fine until year 2038.
         $cookie_expire_time = $cookie_now_time + K_COOKIE_EXPIRE; // set cookie expiration time
         setcookie(
-            'LastVisit', 
+            'LastVisit',
             $cookie_now_time,
             [
                 'expires' => $cookie_expire_time,
@@ -95,7 +95,8 @@ if ($rs = F_db_query($sqls, $db)) {
                 'secure' => K_COOKIE_SECURE,
                 'httponly' => K_COOKIE_HTTPONLY,
                 'samesite' => K_COOKIE_SAMESITE,
-            ]);
+            ]
+        );
         setcookie(
             'PHPSESSID',
             $PHPSESSID,
@@ -106,7 +107,8 @@ if ($rs = F_db_query($sqls, $db)) {
                 'secure' => K_COOKIE_SECURE,
                 'httponly' => K_COOKIE_HTTPONLY,
                 'samesite' => K_COOKIE_SAMESITE,
-            ]);
+            ]
+        );
         // track when user request logout
         if (isset($_REQUEST['logout'])) {
             $_SESSION['logout'] = true;
@@ -134,8 +136,8 @@ if ($rs = F_db_query($sqls, $db)) {
 
 // try other login systems
 // (HTTP-BASIC, CAS, SHIBBOLETH, RADIUS, LDAP)
-require_once('../../shared/code/tce_altauth.php');
-$altusr = F_altLogin();
+// require_once('../../shared/code/tce_altauth.php');
+// $altusr = F_altLogin();
 
 // --- check if login information has been submitted
 if (isset($_POST['logaction']) && $_POST['logaction'] == 'login' && isset($_POST['xuser_name']) && isset($_POST['xuser_password'])) {
@@ -381,27 +383,27 @@ if ($logged) { //if user is just logged in: reloads page
     $htmlredir .= '</html>' . K_NEWLINE;
     switch (K_REDIRECT_LOGIN_MODE) {
         case 1: {
-            // relative redirect
-            header('Location: ' . $_SERVER['SCRIPT_NAME']);
-            break;
-        }
+                // relative redirect
+                header('Location: ' . $_SERVER['SCRIPT_NAME']);
+                break;
+            }
         case 2: {
-            // absolute redirect
-            header('Location: ' . K_PATH_HOST . $_SERVER['SCRIPT_NAME']);
-            break;
-        }
+                // absolute redirect
+                header('Location: ' . K_PATH_HOST . $_SERVER['SCRIPT_NAME']);
+                break;
+            }
         case 3: {
-            // html redirect
-            echo $htmlredir;
-            break;
-        }
+                // html redirect
+                echo $htmlredir;
+                break;
+            }
         case 4:
         default: {
-            // full redirect
-            header('Location: ' . K_PATH_HOST . $_SERVER['SCRIPT_NAME']);
-            echo $htmlredir;
-            break;
-        }
+                // full redirect
+                header('Location: ' . K_PATH_HOST . $_SERVER['SCRIPT_NAME']);
+                echo $htmlredir;
+                break;
+            }
     }
 
     exit;

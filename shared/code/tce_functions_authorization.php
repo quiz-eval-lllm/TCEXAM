@@ -51,9 +51,10 @@ function F_loginForm($faction, $fid, $fmethod, $fenctype, $username)
     require_once('../../shared/config/tce_user_registration.php');
     require_once('../../shared/code/tce_functions_form.php');
     $str = '';
-    
+
 
     $str .= '<div class="tceformbox">' . K_NEWLINE;
+    $str .= '<div style="margin-bottom:10px; font-weight:bold; color:#555; border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#f9f9f9; text-align:center;">Single Sign-On for Integrated Learning Evaluation System</div>' . K_NEWLINE;
     $str .= '<form action="' . $faction . '" method="' . $fmethod . '" id="' . $fid . '" enctype="' . $fenctype . '">' . K_NEWLINE;
     // user name
     $str .= getFormRowTextInput('xuser_name', $l['w_username'], $l['h_login_name'], '', $username, '', 255, false, false, false, '');
@@ -190,7 +191,7 @@ function F_logout_page()
  */
 function F_isAuthorizedUser($table, $field_id_name, $value_id, $field_user_id)
 {
-    global $l,$db;
+    global $l, $db;
     require_once('../config/tce_config.php');
     $table = F_escape_sql($db, $table);
     $field_id_name = F_escape_sql($db, $field_id_name);
@@ -235,7 +236,7 @@ function F_isAuthorizedUser($table, $field_id_name, $value_id, $field_user_id)
  */
 function F_getAuthorizedUsers($user_id)
 {
-    global $l,$db;
+    global $l, $db;
     require_once('../config/tce_config.php');
     $str = ''; // string to return
     $user_id = (int) $user_id;
@@ -265,7 +266,7 @@ function F_getAuthorizedUsers($user_id)
  */
 function F_syncUserGroups($usrid, $grpids)
 {
-    global $l,$db;
+    global $l, $db;
     require_once('../config/tce_config.php');
     $usrid = (int) $usrid;
     // select new group IDs
