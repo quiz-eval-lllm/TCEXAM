@@ -46,97 +46,96 @@ $_REQUEST['ff_required_labels'] = htmlspecialchars($l['w_email'] . ',' . $l['w_e
 
 // process submitted data
 switch ($menu_mode) {
-    case 'update':{ // Update user
-        if ($formstatus = F_check_form_fields()) {
-            // check password
-            if (empty($user_email) || empty($user_email_repeat) || $user_email != $user_email_repeat) {
-                //print message and exit
-                F_print_error('WARNING', $l['m_different_emails']);
-                $formstatus = false;
-                F_stripslashes_formfields();
-                break;
-            }
-
-            $sql = 'SELECT user_password FROM ' . K_TABLE_USERS . ' WHERE user_id=' . $user_id;
-            if ($r = F_db_query($sql, $db)) {
-                if (! ($m = F_db_fetch_array($r)) || ! checkPassword($currentpassword, $m['user_password'])) {
-                    F_print_error('WARNING', $l['m_login_wrong']);
+    case 'update': { // Update user
+            if ($formstatus = F_check_form_fields()) {
+                // check password
+                if (empty($user_email) || empty($user_email_repeat) || $user_email != $user_email_repeat) {
+                    //print message and exit
+                    F_print_error('WARNING', $l['m_different_emails']);
                     $formstatus = false;
                     F_stripslashes_formfields();
                     break;
                 }
-            } else {
-                F_display_db_error(false);
-                break;
-            }
 
-            // Prepare the API call payload
-            $apiPayload = [
-                "name" => "", // No change to the username
-                "password" => "", // No change to the password
-                "email" => $user_email, // Update email
-            ];
+                $sql = 'SELECT user_password FROM ' . K_TABLE_USERS . ' WHERE user_id=' . $user_id;
+                if ($r = F_db_query($sql, $db)) {
+                    if (! ($m = F_db_fetch_array($r)) || ! checkPassword($currentpassword, $m['user_password'])) {
+                        F_print_error('WARNING', $l['m_login_wrong']);
+                        $formstatus = false;
+                        F_stripslashes_formfields();
+                        break;
+                    }
+                } else {
+                    F_display_db_error(false);
+                    break;
+                }
 
-            // Get the user's UUID (user_spring_id) from the database
-            $sql = 'SELECT user_spring_id FROM ' . K_TABLE_USERS . ' WHERE user_id=' . $user_id;
-            if ($r = F_db_query($sql, $db)) {
-                $m = F_db_fetch_array($r);
-                $user_spring_id = $m['user_spring_id'];
-            } else {
-                F_display_db_error(false);
-                break;
-            }
+                // Prepare the API call payload
+                $apiPayload = [
+                    "name" => "", // No change to the username
+                    "password" => "", // No change to the password
+                    "email" => $user_email, // Update email
+                ];
 
-            $user_verifycode = getNewSessionID(); // verification code
-            $sql = 'UPDATE ' . K_TABLE_USERS . ' SET
+                // Get the user's UUID (user_spring_id) from the database
+                $sql = 'SELECT user_spring_id FROM ' . K_TABLE_USERS . ' WHERE user_id=' . $user_id;
+                if ($r = F_db_query($sql, $db)) {
+                    $m = F_db_fetch_array($r);
+                    $user_spring_id = $m['user_spring_id'];
+                } else {
+                    F_display_db_error(false);
+                    break;
+                }
+
+                $user_verifycode = getNewSessionID(); // verification code
+                $sql = 'UPDATE ' . K_TABLE_USERS . ' SET
                 user_email=\'' . F_escape_sql($db, $user_email) . '\',
                 user_level=\'0\',
                 user_verifycode=\'' . $user_verifycode . '\'
                 WHERE user_id=' . $user_id;
-            if (! $r = F_db_query($sql, $db)) {
-                F_display_db_error(false);
-            } else {
-                F_print_error('MESSAGE', $l['m_email_updated']);
-                // require email confirmation
-                require_once('../../shared/code/tce_functions_user_registration.php');
-                F_send_user_reg_email($user_id, $user_email, $user_verifycode);
-                F_print_error('MESSAGE', $user_email . ': ' . $l['m_user_verification_sent']);
-                echo '<div class="container">' . K_NEWLINE;
-                echo '<strong><a href="index.php" title="' . $l['h_index'] . '">' . $l['h_index'] . ' &gt;</a></strong>' . K_NEWLINE;
-                echo '</div>' . K_NEWLINE;
-                require_once('tce_page_footer.php');
-                exit;
+                if (! $r = F_db_query($sql, $db)) {
+                    F_display_db_error(false);
+                } else {
+                    F_print_error('MESSAGE', $l['m_email_updated']);
+                    // require email confirmation
+                    require_once('../../shared/code/tce_functions_user_registration.php');
+                    F_send_user_reg_email($user_id, $user_email, $user_verifycode);
+                    F_print_error('MESSAGE', $user_email . ': ' . $l['m_user_verification_sent']);
+                    echo '<div class="container">' . K_NEWLINE;
+                    echo '<strong><a href="index.php" title="' . $l['h_index'] . '">' . $l['h_index'] . ' &gt;</a></strong>' . K_NEWLINE;
+                    echo '</div>' . K_NEWLINE;
+                    require_once('tce_page_footer.php');
+                    exit;
+                }
+
+                // Call the API to update the email
+                $apiUrl = "http://34.27.150.5:8080/api/v1/user/" . urlencode($user_spring_id) . "/update";
+                $ch = curl_init($apiUrl);
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($apiPayload));
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Content-Type: application/json',
+                    'Accept: application/json'
+                ]);
+
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                if ($httpCode == 200) {
+                } else {
+                    F_print_error('ERROR', 'Failed to update email via API. HTTP Code: ' . $httpCode);
+                    break;
+                }
             }
 
-            // Call the API to update the email
-            $apiUrl = "http://localhost:8080/api/v1/user/" . urlencode($user_spring_id) . "/update";
-            $ch = curl_init($apiUrl);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($apiPayload));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Accept: application/json'
-            ]);
-
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-
-            if ($httpCode == 200) {
-            } else {
-                F_print_error('ERROR', 'Failed to update email via API. HTTP Code: ' . $httpCode);
-                break;
-            }
-            
+            break;
         }
 
-        break;
-    }
-
-    default:{
-        break;
-    }
+    default: {
+            break;
+        }
 } //end of switch
 
 echo '<div class="container">' . K_NEWLINE;

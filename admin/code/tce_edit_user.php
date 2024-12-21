@@ -151,7 +151,7 @@ switch ($menu_mode) { // process submitted data
                         $user_spring_id = $row['user_spring_id'];
 
                         // Call external API to delete the user
-                        $apiUrl = 'http://localhost:8080/api/v1/user/' . urlencode($user_spring_id) . '/delete';
+                        $apiUrl = 'http://34.27.150.5:8080/api/v1/user/' . urlencode($user_spring_id) . '/delete';
                         $ch = curl_init();
                         curl_setopt($ch, CURLOPT_URL, $apiUrl);
                         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
@@ -268,7 +268,7 @@ switch ($menu_mode) { // process submitted data
                 }
 
                 // Make API call to update the user
-                $apiUrl = "http://localhost:8080/api/v1/user/" . urlencode($user_spring_id) . "/update";
+                $apiUrl = "http://34.27.150.5:8080/api/v1/user/" . urlencode($user_spring_id) . "/update";
                 $ch = curl_init($apiUrl);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($apiPayload));
@@ -475,7 +475,7 @@ switch ($menu_mode) { // process submitted data
             ];
 
             // Call the API
-            $apiUrl = 'http://localhost:8080/api/v1/user';
+            $apiUrl = 'http://34.27.150.5:8080/api/v1/user';
             $apiResponse = callUserApi($apiUrl, $userApiData);
 
             if ($apiResponse['success']) {

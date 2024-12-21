@@ -38,7 +38,7 @@ $stmt->close();
 $db->close();
 
 // Data yang akan dikirimkan ke model AI
-$ai_api_url = 'http://localhost:8080/api/v1/evaluation/essay'; // URL model AI
+$ai_api_url = 'http://34.27.150.5:8080/api/v1/evaluation/essay'; // URL model AI
 $payload = [
     "quizId" => "", // Placeholder for quiz ID, update if applicable
     "answerInfo" => [
