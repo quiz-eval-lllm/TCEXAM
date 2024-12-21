@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($answer_type === '0') {
         $answer_type_display = 'Multiple Choice';
         $type = 0;
-        $answer_type_final = 'multiple';
+        $answer_type_final = 'single';
     } else if ($answer_type === '1') {
         $answer_type_display = 'Essay';
         $type = 1;
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Upload PDF endpoint
-            $url = "http://34.16.76.175:8080/api/v1/upload_pdf";
+            $url = "http://localhost:8080/api/v1/upload_pdf";
 
             // Initialize cURL
             $ch = curl_init();
@@ -158,6 +158,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $_SESSION['access_token'],
+                'Content-Type: multipart/form-data'
+            ]);
 
             // Execute cURL and get the response
             $response = curl_exec($ch);
@@ -192,12 +196,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($ch === false) {
                 die('Failed to initialize cURL session');
             }
-            curl_setopt($ch, CURLOPT_URL, 'http://34.16.76.175:8080/api/v1/quiz/package');
+            curl_setopt($ch, CURLOPT_URL, 'http://localhost:8080/api/v1/quiz/package');
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($queryData));
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
                 'Accept: application/json',
+                'Authorization: Bearer ' . $_SESSION['access_token'],
             ]);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 600);

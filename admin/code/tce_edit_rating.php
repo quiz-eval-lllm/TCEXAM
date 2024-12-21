@@ -455,7 +455,7 @@ echo '</div>' . K_NEWLINE;
                 console.log('Response:', data); // Debugging API response
                 if (data.score) {
                     // Display the score below the button
-                    evaluationResult.innerHTML = `<br> Score: ${(data.score)}/100<br>`;
+                    evaluationResult.innerHTML = `<br> Score: ${(data.score)}/10<br>`;
                 } else {
                     // Handle unexpected response
                     evaluationResult.innerHTML = 'Error: Unable to retrieve score. Please try again.';
