@@ -379,6 +379,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 echo '<p>Error: ' . htmlspecialchars($responseData['message'], ENT_QUOTES, 'UTF-8') . '</p>';
             }
+        } else {
+            // Handle file upload error
+            switch ($_FILES['file']['error']) {
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    F_print_error('ERROR', 'The uploaded file exceeds the maximum allowed size of 100MB.', true);
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    F_print_error('ERROR', 'No file was uploaded. Please select a file to upload.', true);
+                    break;
+                default:
+                    F_print_error('ERROR', 'An error occurred during file upload. Please try again.', true);
+                    break;
+            }
         }
     }
 }
