@@ -98,7 +98,7 @@ switch ($menu_mode) {
                 ];
 
                 // Make API call to update the password
-                $apiUrl = "http://localhost:8080/api/v1/user/" . urlencode($user_spring_id) . "/update";
+                $apiUrl = "http://34.27.150.5:8080/api/v1/user/" . urlencode($user_spring_id) . "/update";
                 $ch = curl_init($apiUrl);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($apiPayload));

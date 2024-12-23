@@ -49,7 +49,8 @@ require_once('../code/tce_page_header.php');
 require_once('../../shared/code/tce_functions_form.php');
 
 // Helper function to generate UUID
-function fetchUUID() {
+function fetchUUID()
+{
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, 'https://www.uuidtools.com/api/generate/v4');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -156,7 +157,7 @@ if ($menu_mode == 'add') { // process submitted data
         }
 
         // check password
-        if (! empty($newpassword) || ! empty($newpassword_repeat)) {// update password
+        if (! empty($newpassword) || ! empty($newpassword_repeat)) { // update password
             if ($newpassword == $newpassword_repeat) {
                 $user_password = getPasswordHash($newpassword);
                 // update OTP key
@@ -181,9 +182,9 @@ if ($menu_mode == 'add') { // process submitted data
             $usrlevel = K_USRREG_EMAIL_CONFIRM ? 0 : 1;
 
             // Fetch UUID
-            $uuidResult = fetchUUID(); 
+            $uuidResult = fetchUUID();
             if ($uuidResult['success']) {
-                $user_spring_id = $uuidResult['uuid']; 
+                $user_spring_id = $uuidResult['uuid'];
             } else {
                 F_print_error('ERROR', 'Failed to generate UUID: ' . $uuidResult['error']);
                 exit;
@@ -267,12 +268,12 @@ if ($menu_mode == 'add') { // process submitted data
                 'id' => $user_spring_id,
                 'name' => $user_name,
                 'email' => $user_email,
-                'password' => $newpassword, 
+                'password' => $newpassword,
                 'role' => $role
             ];
 
             // Call the API
-            $apiUrl = 'http://localhost:8080/api/v1/user';
+            $apiUrl = 'http://34.27.150.5:8080/api/v1/user';
             $apiResponse = callUserApi($apiUrl, $userApiData);
 
             if ($apiResponse['success']) {
