@@ -195,7 +195,7 @@ define('K_COOKIE_HTTPONLY', true);
 /**
  * The SameSite attribute lets servers specify whether/when cookies are sent with cross-site requests.
  */
-define('K_COOKIE_SAMESITE', 'None');
+define('K_COOKIE_SAMESITE', 'Lax');
 
 /**
  * Expiration time for cookies.
