@@ -116,9 +116,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo "<p>Language: " . htmlspecialchars($language_display, ENT_QUOTES, 'UTF-8') . "</p>";
     echo "<p>Prompt: " . htmlspecialchars($text, ENT_QUOTES, 'UTF-8') . "</p>";
 
+    echo "=================1";
+
     if (isset($_FILES['file'])) {
+        echo "=================2";
+
         if ($_FILES['file']['error'] === UPLOAD_ERR_OK) {
 
+            echo "=================3";
 
             // <======STORING PDF======>
 
@@ -129,6 +134,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 F_print_error('ERROR', 'File name is empty. Please ensure a valid file is uploaded.', true);
             }
 
+            echo "=================4";
+
+
             // Deployment path
             $deploymentPath = '/var/www/html/uploads/';
             if (!is_dir($deploymentPath)) {
@@ -136,6 +144,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     F_print_error('ERROR', 'Failed to create directory: ' . $deploymentPath, true);
                 }
             }
+
+            echo "=================5";
 
             $permanentPath = $deploymentPath . $fileName;
 
@@ -147,6 +157,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($fileType === false) {
                 F_print_error('ERROR', 'Could not determine MIME type for the file: ' . $permanentPath, true);
             }
+
+            echo "=================6";
 
             // Upload PDF endpoint
             $url = "http://34.27.150.5:8080/api/v1/upload_pdf";
@@ -175,6 +187,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $curlError = curl_error($ch);
             curl_close($ch);
+
+            echo "=================7";
+
 
             // Handle response
             if ($httpCode == 200) {
