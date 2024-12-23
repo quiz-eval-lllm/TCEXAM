@@ -32,7 +32,7 @@
 /**
  * TCExam version (do not change).
  */
-define ('K_TCEXAM_VERSION', file_get_contents('../../VERSION'));
+define('K_TCEXAM_VERSION', file_get_contents('../../VERSION'));
 
 /**
  * 2-letters code for default language.
@@ -185,7 +185,7 @@ define('K_COOKIE_PATH', '/');
 /**
  * If true use secure cookies.
  */
-define('K_COOKIE_SECURE', true);
+define('K_COOKIE_SECURE', false);
 
 /**
  * When true the cookie will be made accessible only through the HTTP protocol.
@@ -195,7 +195,7 @@ define('K_COOKIE_HTTPONLY', true);
 /**
  * The SameSite attribute lets servers specify whether/when cookies are sent with cross-site requests.
  */
-define('K_COOKIE_SAMESITE', 'Strict');
+define('K_COOKIE_SAMESITE', 'None');
 
 /**
  * Expiration time for cookies.
@@ -264,9 +264,11 @@ require_once('../../shared/code/tce_functions_errmsg.php');
 // load language resources
 
 // set user's selected language or default language
-if (isset($_REQUEST['lang'])
+if (
+    isset($_REQUEST['lang'])
     and (strlen($_REQUEST['lang']) == 2)
-    and (array_key_exists($_REQUEST['lang'], unserialize(K_AVAILABLE_LANGUAGES)))) {
+    and (array_key_exists($_REQUEST['lang'], unserialize(K_AVAILABLE_LANGUAGES)))
+) {
     /**
      * Use requested language.
      * @ignore
@@ -274,9 +276,11 @@ if (isset($_REQUEST['lang'])
     define('K_USER_LANG', $_REQUEST['lang']);
     // set client cookie
     setcookie('SessionUserLang', K_USER_LANG, time() + K_COOKIE_EXPIRE, K_COOKIE_PATH, K_COOKIE_DOMAIN, K_COOKIE_SECURE);
-} elseif (isset($_COOKIE['SessionUserLang'])
+} elseif (
+    isset($_COOKIE['SessionUserLang'])
     and (strlen($_COOKIE['SessionUserLang']) == 2)
-    and (array_key_exists($_COOKIE['SessionUserLang'], unserialize(K_AVAILABLE_LANGUAGES)))) {
+    and (array_key_exists($_COOKIE['SessionUserLang'], unserialize(K_AVAILABLE_LANGUAGES)))
+) {
     /**
      * Use session language.
      * @ignore
@@ -293,7 +297,7 @@ if (isset($_REQUEST['lang'])
 // TMX class
 require_once('../../shared/code/tce_tmx.php');
 // instantiate new TMXResourceBundle object
-$lang_resources = new TMXResourceBundle(K_PATH_TMX_FILE, K_USER_LANG, K_PATH_LANG_CACHE.basename(K_PATH_TMX_FILE, '.xml').'_'.K_USER_LANG.'.php');
+$lang_resources = new TMXResourceBundle(K_PATH_TMX_FILE, K_USER_LANG, K_PATH_LANG_CACHE . basename(K_PATH_TMX_FILE, '.xml') . '_' . K_USER_LANG . '.php');
 $l = $lang_resources->getResource(); // language array
 
 ini_set('arg_separator.output', '&amp;');
@@ -353,11 +357,11 @@ function addSlashesArray($data)
 define('K_CUSTOM_AUTH_METHODS', serialize(array(
     // 'basic', // Uncomment to enable the simple custom authentication method.
     /**
-     * Take a look at the following files to create your own custom authentication method.
-     *
-     * ../../shared/config/custom_auth/basic.php
-     * ../../shared/custom_auth/basic.php
-     */
+ * Take a look at the following files to create your own custom authentication method.
+ *
+ * ../../shared/config/custom_auth/basic.php
+ * ../../shared/custom_auth/basic.php
+ */
 )));
 
 //============================================================+
