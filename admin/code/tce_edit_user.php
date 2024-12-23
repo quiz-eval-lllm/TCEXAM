@@ -342,6 +342,7 @@ switch ($menu_mode) { // process submitted data
                     }
                 } else {
                     F_print_error('ERROR', 'Failed to update user via API. HTTP Code: ' . $httpCode);
+                    F_print_error('ERROR', 'Cause: ' . $response);
                 }
             }
 
