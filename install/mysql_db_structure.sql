@@ -41,7 +41,7 @@ CREATE TABLE tce_users (user_id Bigint UNSIGNED NOT NULL AUTO_INCREMENT,
 																									user_level Smallint(3) UNSIGNED NOT NULL DEFAULT 1,
 																									user_verifycode Varchar(32),
 																									user_otpkey Varchar(255),
-																									user_spring_id VARCHAR(36) NOT NULL DEFAULT "user_spring_id",
+																									user_spring_id VARCHAR(36) NOT NULL DEFAULT "user_spring_ids",
 																									UNIQUE (user_verifycode), Primary Key (user_id)) ENGINE = InnoDB CHARACTER
 SET utf8 COLLATE utf8_unicode_ci;
 
