@@ -450,11 +450,17 @@ echo '</div>' . K_NEWLINE;
                 },
                 body: JSON.stringify(payload)
             })
-            .then(response => {
+            .then(async response => {
                 console.log('Raw Response:', response); // Log raw response object
+
+                // Check if the response status is not OK (non-2xx)
                 if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`); // Handle non-2xx status codes
+                    // Try to parse the error message from the response body
+                    const errorText = await response.text();
+                    throw new Error(`HTTP Error: ${response.status} - ${errorText}`);
                 }
+
+                // If the response is OK, parse it as JSON
                 return response.json();
             })
             .then(data => {
