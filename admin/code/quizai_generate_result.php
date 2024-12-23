@@ -126,19 +126,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $tmpPath = $_FILES['file']['tmp_name'];
             $fileName = isset($_FILES['file']['name']) ? $_FILES['file']['name'] : '';
             if (empty($fileName)) {
-                die("File name is empty.");
+                F_print_error('ERROR', 'File name is empty. Please ensure a valid file is uploaded.', true);
             }
 
-            $permanentPath = 'C:/xampp/tmp/' . $fileName;
+            // Deployment path
+            $deploymentPath = '/var/www/html/uploads/';
+            if (!is_dir($deploymentPath)) {
+                if (!mkdir($deploymentPath, 0777, true)) {
+                    F_print_error('ERROR', 'Failed to create directory: ' . $deploymentPath, true);
+                }
+            }
 
-            // Move the file to a permanent location
+            $permanentPath = $deploymentPath . $fileName;
+
             if (!move_uploaded_file($tmpPath, $permanentPath)) {
-                die("Failed to move uploaded file to: " . $permanentPath);
+                F_print_error('ERROR', 'Failed to move uploaded file to: ' . $permanentPath . '. Check directory permissions.', true);
             }
 
             $fileType = mime_content_type($permanentPath);
             if ($fileType === false) {
-                die("Could not determine MIME type for: $permanentPath");
+                F_print_error('ERROR', 'Could not determine MIME type for the file: ' . $permanentPath, true);
             }
 
             // Upload PDF endpoint
