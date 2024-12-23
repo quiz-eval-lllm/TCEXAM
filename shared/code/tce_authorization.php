@@ -398,50 +398,50 @@ if (isset($_POST['logaction']) && $_POST['logaction'] == 'login' && isset($_POST
                     if ($r = F_db_query($sql, $db)) {
                         if ($m = F_db_fetch_array($r)) {
 
-                            // // User exists, set session data
-                            // $_SESSION['session_user_id'] = $m['user_id'];
-                            // $_SESSION['session_user_name'] = $m['user_name'];
-                            // $_SESSION['session_user_ip'] = getNormalizedIP($_SERVER['REMOTE_ADDR']);
-                            // $_SESSION['session_user_level'] = $m['user_level'];
-                            // $_SESSION['session_user_firstname'] = urlencode($m['user_firstname']);
-                            // $_SESSION['session_user_lastname'] = urlencode($m['user_lastname']);
-                            // $_SESSION['session_test_login'] = '';
-                            // $_SESSION['session_last_visit'] = isset($_COOKIE['LastVisit']) ? (int) $_COOKIE['LastVisit'] : 0;
+                            // User exists, set session data
+                            $_SESSION['session_user_id'] = $m['user_id'];
+                            $_SESSION['session_user_name'] = $m['user_name'];
+                            $_SESSION['session_user_ip'] = getNormalizedIP($_SERVER['REMOTE_ADDR']);
+                            $_SESSION['session_user_level'] = $m['user_level'];
+                            $_SESSION['session_user_firstname'] = urlencode($m['user_firstname']);
+                            $_SESSION['session_user_lastname'] = urlencode($m['user_lastname']);
+                            $_SESSION['session_test_login'] = '';
+                            $_SESSION['session_last_visit'] = isset($_COOKIE['LastVisit']) ? (int) $_COOKIE['LastVisit'] : 0;
 
-                            // // Hit the authentication endpoint API
-                            // $authApiUrl = "http://34.27.150.5:8080/api/v1/user/auth";
-                            // $authPayload = [
-                            //     "username" => $username,
-                            //     "password" => $password
-                            // ];
+                            // Hit the authentication endpoint API
+                            $authApiUrl = "http://34.27.150.5:8080/api/v1/user/auth";
+                            $authPayload = [
+                                "username" => $username,
+                                "password" => $password
+                            ];
 
-                            // $ch = curl_init($authApiUrl);
-                            // curl_setopt($ch, CURLOPT_POST, true);
-                            // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($authPayload));
-                            // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                            // curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                            //     'Content-Type: application/json',
-                            //     'Accept: application/json'
-                            // ]);
+                            $ch = curl_init($authApiUrl);
+                            curl_setopt($ch, CURLOPT_POST, true);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($authPayload));
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                                'Content-Type: application/json',
+                                'Accept: application/json'
+                            ]);
 
-                            // $response = curl_exec($ch);
-                            // $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                            // curl_close($ch);
+                            $response = curl_exec($ch);
+                            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                            curl_close($ch);
 
-                            // if ($httpCode === 200) {
-                            //     $apiResponse = json_decode($response, true);
-                            //     if (!empty($apiResponse['content']['token'])) {
-                            //         // Store the token in the session
-                            //         $_SESSION['access_token'] = $apiResponse['content']['token'];
+                            if ($httpCode === 200) {
+                                $apiResponse = json_decode($response, true);
+                                if (!empty($apiResponse['content']['token'])) {
+                                    // Store the token in the session
+                                    $_SESSION['access_token'] = $apiResponse['content']['token'];
 
-                            //         // Log success
-                            //         F_print_error('MESSAGE', 'User authenticated and token stored in session.');
-                            //     } else {
-                            //         F_print_error('WARNING', 'API response did not include a token.');
-                            //     }
-                            // } else {
-                            //     F_print_error('WARNING', 'Failed to authenticate user via API. HTTP code: ' . $httpCode);
-                            // }
+                                    // Log success
+                                    F_print_error('MESSAGE', 'User authenticated and token stored in session.');
+                                } else {
+                                    F_print_error('WARNING', 'API response did not include a token.');
+                                }
+                            } else {
+                                F_print_error('WARNING', 'Failed to authenticate user via API. HTTP code: ' . $httpCode);
+                            }
                         } else {
                             // Fetch UUID
                             $uuidResult = fetchUUID();
@@ -495,50 +495,50 @@ if (isset($_POST['logaction']) && $_POST['logaction'] == 'login' && isset($_POST
                                 'role' => $spring_role
                             ];
 
-                            // $apiUrl = 'http://34.27.150.5:8080/api/v1/user';
+                            $apiUrl = 'http://34.27.150.5:8080/api/v1/user';
 
-                            // $ch = curl_init();
-                            // curl_setopt($ch, CURLOPT_URL, $apiUrl);
-                            // curl_setopt($ch, CURLOPT_POST, true);
-                            // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($userApiData));
-                            // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                            // curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                            //     'Content-Type: application/json',
-                            //     'Accept: application/json'
-                            // ]);
+                            $ch = curl_init();
+                            curl_setopt($ch, CURLOPT_URL, $apiUrl);
+                            curl_setopt($ch, CURLOPT_POST, true);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($userApiData));
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                                'Content-Type: application/json',
+                                'Accept: application/json'
+                            ]);
 
-                            // $response = curl_exec($ch);
-                            // $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                            // curl_close($ch);
+                            $response = curl_exec($ch);
+                            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                            curl_close($ch);
 
-                            // // Check the response
-                            // if ($httpCode === 200 || $httpCode === 201) {
-                            //     $apiResponse = json_decode($response, true);
-                            //     if (!empty($apiResponse['content']['token'])) {
-                            //         // Store the token in the session
-                            //         $_SESSION['access_token'] = $apiResponse['content']['token'];
-                            //     } else {
-                            //         F_print_error('WARNING', 'API response did not include a token.');
-                            //     }
-                            // } else {
-                            //     F_print_error('WARNING', 'API call failed: HTTP code ' . $httpCode);
-                            // }
+                            // Check the response
+                            if ($httpCode === 200 || $httpCode === 201) {
+                                $apiResponse = json_decode($response, true);
+                                if (!empty($apiResponse['content']['token'])) {
+                                    // Store the token in the session
+                                    $_SESSION['access_token'] = $apiResponse['content']['token'];
+                                } else {
+                                    F_print_error('WARNING', 'API response did not include a token.');
+                                }
+                            } else {
+                                F_print_error('WARNING', 'API call failed: HTTP code ' . $httpCode);
+                            }
                         }
                         $logged = true;
-                        if (K_USER_GROUP_RSYNC) {
-                            // sync user groups
-                            F_syncUserGroups($_SESSION['session_user_id'], $altusr['usrgrp_group_id']);
-                        }
+                        error_log('Session data: ' . print_r($_SESSION, true));
                     } else {
                         F_display_db_error();
                     }
                 } else {
+                    error_log('Session data: ' . print_r($_SESSION, true));
                     F_print_error('WARNING', $l['m_login_wrong']);
                 }
             } else {
+                error_log('ERROR AUTH 1');
                 F_print_error('WARNING', $l['m_login_wrong']);
             }
         } else {
+            error_log('ERROR AUTH 2');
             $login_error = true;
         }
     } // end of brute-force check
