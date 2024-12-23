@@ -252,7 +252,7 @@ echo getFormNoscriptSelect('selectcategory');
 
 echo '<div class="row">' . K_NEWLINE;
 echo '<span class="label">' . K_NEWLINE;
-echo '<label for="testlog_id">' . (isset($l['w_answer']) ? $l['w_answer'] : 'Answer') . '</label>' . K_NEWLINE;
+echo '<label for="testlog_id">' . $l['w_answer'] . '</label>' . K_NEWLINE;
 echo '</span>' . K_NEWLINE;
 echo '<span class="formw">' . K_NEWLINE;
 echo '<select name="testlog_id" id="testlog_id" size="0" onchange="document.getElementById(\'form_ratingeditor\').submit()" title="' . $l['h_select_answer'] . '">' . K_NEWLINE;
@@ -450,7 +450,13 @@ echo '</div>' . K_NEWLINE;
                 },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Raw Response:', response); // Log raw response object
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`); // Handle non-2xx status codes
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log('Response:', data); // Debugging API response
                 if (data.score) {
