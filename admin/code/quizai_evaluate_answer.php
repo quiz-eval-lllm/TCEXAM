@@ -15,7 +15,7 @@ if (!isset($data['question_id'], $data['user_answer'], $data['question_spring_id
 }
 
 // Ambil data pertanyaan berdasarkan question_id dari database
-$db = new mysqli('localhost', 'root', '', 'tcexam'); // Update dengan kredensial database Anda
+$db = new mysqli('localhost', 'tcuser', 'tcpassword', 'tcexam'); // Update dengan kredensial database Anda
 if ($db->connect_error) {
     http_response_code(500);
     echo json_encode(['error' => 'Database connection failed: ' . $db->connect_error]);
