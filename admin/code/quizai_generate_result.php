@@ -195,6 +195,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // <======INVOKING GENERATE QUIZ API======>
 
+            //////// TODO: Send Requests to RabbitMQ from TCExam
+
             // Prepare the query data
             $queryData = [
                 'userId' => $user_spring_id,
@@ -237,6 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             curl_close($ch);
 
+            //////// TODO: Fetch Responses in TCExam
 
             // Decode JSON response
             $responseData = json_decode($response, true);
