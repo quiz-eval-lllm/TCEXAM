@@ -133,29 +133,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
-            // Deployment path
-            $deploymentPath = '/var/www/html/uploads/';
-            if (!is_dir($deploymentPath)) {
-                if (!mkdir($deploymentPath, 0777, true)) {
-                    F_print_error('ERROR', 'Failed to create directory: ' . $deploymentPath, true);
-                }
-            }
+            // // Deployment path
+            // $deploymentPath = '/var/www/html/uploads/';
+            // if (!is_dir($deploymentPath)) {
+            //     if (!mkdir($deploymentPath, 0777, true)) {
+            //         F_print_error('ERROR', 'Failed to create directory: ' . $deploymentPath, true);
+            //     }
+            // }
 
 
-            $permanentPath = $deploymentPath . $fileName;
+            // $permanentPath = $deploymentPath . $fileName;
 
+            // if (!move_uploaded_file($tmpPath, $permanentPath)) {
+            //     F_print_error('ERROR', 'Failed to move uploaded file to: ' . $permanentPath . '. Check directory permissions.', true);
+            // }
+
+            // $fileType = mime_content_type($permanentPath);
+            // if ($fileType === false) {
+            //     F_print_error('ERROR', 'Could not determine MIME type for the file: ' . $permanentPath, true);
+            // }
+
+            $permanentPath = 'C:/xampp/tmp/' . $fileName;
+
+            // Move the file to a permanent location
             if (!move_uploaded_file($tmpPath, $permanentPath)) {
-                F_print_error('ERROR', 'Failed to move uploaded file to: ' . $permanentPath . '. Check directory permissions.', true);
+                die("Failed to move uploaded file to: " . $permanentPath);
             }
 
             $fileType = mime_content_type($permanentPath);
             if ($fileType === false) {
-                F_print_error('ERROR', 'Could not determine MIME type for the file: ' . $permanentPath, true);
+                die("Could not determine MIME type for: $permanentPath");
             }
 
 
             // Upload PDF endpoint
-            $url = "http://34.27.150.5:8080/api/v1/upload_pdf";
+            $url = "http://localhost:8080/api/v1/upload_pdf";
 
             // Initialize cURL
             $ch = curl_init();
@@ -191,189 +203,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 echo "<p>Failed to upload file.</p>";
             }
-
-
-            // <======INVOKING GENERATE QUIZ API======>
-
-            //////// TODO: Send Requests to RabbitMQ from TCExam
-
-            // Prepare the query data
-            $queryData = [
-                'userId' => $user_spring_id,
-                'module' => $module_name,
-                'subject' => $subject_name,
-                'type' => $type,
-                'prompt' => $text,
-                'language' => $language,
-                'contextUrl' => $pdf_url,
-            ];
-
-            // Initialize cURL session for generate quiz
-            $ch = curl_init();
-            if ($ch === false) {
-                die('Failed to initialize cURL session');
-            }
-            curl_setopt($ch, CURLOPT_URL, 'http://34.27.150.5:8080/api/v1/quiz/package');
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($queryData));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Accept: application/json',
-                'Authorization: Bearer ' . $_SESSION['access_token'],
-            ]);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 600);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 900);
-
-            // Execute cURL request for generting quiz
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            if (curl_errno($ch)) {
-                echo '<div class="center-card"><div class="card" style="background-color:#F6F6F6"><div class="card-body">';
-                echo '<p>Error: ' . $httpCode . '</p>';
-                echo '</div></div></div>';
-                curl_close($ch);
-                exit;
-            }
-
-            curl_close($ch);
-
-            //////// TODO: Fetch Responses in TCExam
-
-            // Decode JSON response
-            $responseData = json_decode($response, true);
-
-            // Ensure the response was decoded successfully
-            if ($responseData['code'] == 200 && isset($responseData['content']['question_data'])) {
-                $questions = $responseData['content']['question_data'];
-                $package_id = $responseData['content']['package_id'];
-
-                echo '<style>
-                .container {
-                    display: flex;
-                    flex-wrap: wrap; /* Allows wrapping */
-                    gap: 15px; /* Spacing between cards */
-                    justify-content: flex-start; /* Align items tao the start horizontally */
-                    margin-top: 20px;
-                }
-                .card {
-                    background-color: #F6F6F6;
-                    padding: 20px;
-                    border: 1px solid #000000;
-                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                    width: calc(33.333% - 20px); /* Adjust card width for 3 columns with space */
-                    min-width: 300px; /* Minimum card width */
-                    box-sizing: border-box;
-                    border-radius: 5px;
-                }
-                .card label {
-                    font-weight: bold;
-                    margin-bottom: 10px;
-                    display: block;
-                }
-                .card p {
-                    margin: 5px 0;
-                }
-                .highlight {
-                    background-color: yellow;
-                    font-weight: bold;
-                }
-                .difficulty-section {
-                    margin-top: 10px;
-                    display: flex;
-                    align-items: center;
-                }
-                .difficulty-section label {
-                    margin-right: 10px;
-                }
-                .difficulty-section select {
-                    margin-right: 10px;
-                }
-                .submit-section {
-                    text-align: center;
-                    margin-top: 20px;
-                }
-            </style>';
-                echo '<form method="POST" action="process.php">';
-                foreach ($questions as $index => $question) {
-                    echo '<div class="card">';
-                    echo '<label for="question' . $index . '"><strong>' . htmlspecialchars($question['question'], ENT_QUOTES, 'UTF-8') . '</strong></label>';
-
-                    // Display answers (options or essay answer)
-                    if ($answer_type === '0') { // Multiple Choice
-                        echo '<div>';
-                        foreach ($question['options'] as $optionIndex => $option) {
-                            $is_correct = ($option === $question['answer']) ? 'true' : 'false';
-                            $option_text = htmlspecialchars($option, ENT_QUOTES, 'UTF-8');
-                            if ($is_correct === 'true') {
-                                echo '<p class="highlight">' . $option_text . '</p>';
-                            } else {
-                                echo '<p>' . $option_text . '</p>';
-                            }
-                        }
-                        echo '</div>';
-                    } else { // Essay Answer
-                        echo '<div>';
-                        $answer_text = htmlspecialchars($question['answer'], ENT_QUOTES, 'UTF-8');
-                        echo '<p><strong>Answer:</strong> ' . $answer_text . '</p>';
-                        echo '</div>';
-                    }
-
-                    // Display explanation if available
-                    if (isset($question['explanation']) && !empty($question['explanation'])) {
-                        $explanation = htmlspecialchars($question['explanation'], ENT_QUOTES, 'UTF-8');
-                        echo '<p><strong>Explanation:</strong> ' . $explanation . '</p>';
-                    }
-
-                    // Add difficulty dropdown
-                    echo '<div class="difficulty-section">';
-                    echo '<label for="difficulty' . $index . '">Difficulty:</label>';
-                    echo '<select id="difficulty' . $index . '" name="difficulty[' . $index . ']">';
-                    for ($i = 1; $i <= 10; $i++) {
-                        echo '<option value="' . $i . '">' . $i . '</option>';
-                    }
-                    echo '</select>';
-                    echo '</div>';
-
-                    // Checkbox for question selection
-                    echo '<input type="checkbox" id="question' . $index . '" name="selected_questions[]" value="' . $index . '" style="margin-left: 10px;">';
-                    echo '<label for="question' . $index . '" style="margin-left: 5px;">Import this question</label>';
-
-                    // Include hidden inputs for full question details, but conditionally include only selected questions
-                    echo '<div class="hidden-question-data">';
-                    echo '<input type="hidden" name="questions[' . $index . '][question_spring_id]" value="' . htmlspecialchars($question['question_id'], ENT_QUOTES, 'UTF-8') . '">';
-                    echo '<input type="hidden" name="questions[' . $index . '][question]" value="' . htmlspecialchars($question['question'], ENT_QUOTES, 'UTF-8') . '">';
-                    if ($answer_type === '0' && isset($question['options']) && is_array($question['options'])) {
-                        foreach ($question['options'] as $optionIndex => $option) {
-                            echo '<input type="hidden" name="questions[' . $index . '][answers][' . $optionIndex . '][description]" value="' . htmlspecialchars($option, ENT_QUOTES, 'UTF-8') . '">';
-                            echo '<input type="hidden" name="questions[' . $index . '][answers][' . $optionIndex . '][isright]" value="' . ($option === $question['answer'] ? 'true' : 'false') . '">';
-                        }
-                    } else { // For essay or other types, use answer as description
-                        echo '<input type="hidden" name="questions[' . $index . '][answers][0][description]" value="' . htmlspecialchars($question['answer'], ENT_QUOTES, 'UTF-8') . '">';
-                        echo '<input type="hidden" name="questions[' . $index . '][answers][0][isright]" value="true">';
-                    }
-                    if (isset($question['explanation'])) {
-                        echo '<input type="hidden" name="questions[' . $index . '][explanation]" value="' . htmlspecialchars($question['explanation'], ENT_QUOTES, 'UTF-8') . '">';
-                    }
-                    echo '</div>';
-
-                    echo '</div>'; // End of card
-                }
-
-                echo '</div>'; // End of container
-                echo '<input type="hidden" name="answer_type" value="' . htmlspecialchars($answer_type_final, ENT_QUOTES, 'UTF-8') . '">';
-                echo '<input type="hidden" name="text" value="' . htmlspecialchars($text, ENT_QUOTES, 'UTF-8') . '">';
-                echo '<input type="hidden" name="module_id" value="' . htmlspecialchars($selected_module_id, ENT_QUOTES, 'UTF-8') . '">';
-                echo '<input type="hidden" name="subject_id" value="' . htmlspecialchars($selected_subject_id, ENT_QUOTES, 'UTF-8') . '">';
-                echo '<input type="hidden" name="module" value="' . htmlspecialchars($module_name, ENT_QUOTES, 'UTF-8') . '">';
-                echo '<input type="hidden" name="subject" value="' . htmlspecialchars($subject_name, ENT_QUOTES, 'UTF-8') . '">';
-                echo '<input type="hidden" name="subject_desc" value="' . htmlspecialchars($subject_description, ENT_QUOTES, 'UTF-8') . '">';
-                echo '<input type="submit" value="Submit" style="margin-top: 20px;">';
-                echo '</form>';
-            } else {
-                echo '<p>Error: ' . htmlspecialchars($responseData['message'], ENT_QUOTES, 'UTF-8') . '</p>';
-            }
         } else {
             // Handle file upload error
             switch ($_FILES['file']['error']) {
@@ -391,6 +220,269 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: flex-start;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: #F6F6F6;
+            padding: 20px;
+            border: 1px solid #CCCCCC;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: calc(33.333% - 20px);
+            min-width: 300px;
+            box-sizing: border-box;
+            border-radius: 8px;
+        }
+
+        .card label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .card p {
+            margin: 5px 0;
+        }
+
+        .highlight {
+            background-color: #FFF9C4;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .difficulty-section {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .difficulty-section label {
+            margin-right: 10px;
+        }
+
+        .difficulty-section select {
+            margin-right: 10px;
+        }
+
+        .submit-button {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #999;
+            color: white;
+            border: 1px solid #666;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .submit-button:hover {
+            background-color: #777;
+        }
+
+        #loading-message {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 16px;
+            color: #666;
+            background-color: #f2f2f2;
+            border: 1px solid #ccc;
+        }
+
+        #loading-message p {
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading-message" style="display: none;">
+        <p>Please wait... Fetching questions from the server. This may take a moment.</p>
+    </div>
+    <form id="question-form" method="POST" action="process.php">
+        <!-- Hidden inputs to pass the global data -->
+        <input type="hidden" name="answer_type" value="<?php echo htmlspecialchars($answer_type_final, ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="text" value="<?php echo htmlspecialchars($text, ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="module_id" value="<?php echo htmlspecialchars($selected_module_id, ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="subject_id" value="<?php echo htmlspecialchars($selected_subject_id, ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="module" value="<?php echo htmlspecialchars($module_name, ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="subject" value="<?php echo htmlspecialchars($subject_name, ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="hidden" name="subject_desc" value="<?php echo htmlspecialchars($subject_description, ENT_QUOTES, 'UTF-8'); ?>">
+
+        <div id="questions-container" class="container"></div>
+        <button type="submit" id="submit-button" class="submit-button">Submit</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const apiUrl = "http://localhost:8080/api/v1/quiz/package";
+            const loadingMessage = document.getElementById('loading-message');
+            const submitButton = document.getElementById('submit-button');
+            const questionsContainer = document.getElementById('questions-container');
+
+            // Utility function to toggle the loading message
+            function toggleLoading(show) {
+                if (show) {
+                    loadingMessage.style.display = 'flex';
+                    questionsContainer.style.display = 'none';
+                    submitButton.style.display = 'none';
+                } else {
+                    loadingMessage.style.display = 'none';
+                    questionsContainer.style.display = 'flex';
+                    submitButton.style.display = 'block'; // Show submit button after fetching
+                }
+            }
+
+            // Fetch questions from API
+            async function fetchQuestions() {
+                try {
+                    toggleLoading(true); // Show "Processing..." message
+
+                    const requestBody = {
+                        userId: "<?php echo htmlspecialchars($user_spring_id, ENT_QUOTES, 'UTF-8'); ?>",
+                        module: "<?php echo htmlspecialchars($module_name, ENT_QUOTES, 'UTF-8'); ?>",
+                        subject: "<?php echo htmlspecialchars($subject_name, ENT_QUOTES, 'UTF-8'); ?>",
+                        type: <?php echo (int)$type; ?>,
+                        prompt: "<?php echo htmlspecialchars($text, ENT_QUOTES, 'UTF-8'); ?>",
+                        language: "<?php echo htmlspecialchars($language, ENT_QUOTES, 'UTF-8'); ?>",
+                        contextUrl: "<?php echo htmlspecialchars($pdf_url, ENT_QUOTES, 'UTF-8'); ?>"
+                    };
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer <?php echo $_SESSION['access_token']; ?>`
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.code === 200 && data.content.question_data) {
+                        renderQuestions(data.content.question_data);
+                    } else {
+                        throw new Error(`Error: ${data.message || 'Unknown error'}`);
+                    }
+                } catch (error) {
+                    console.error("Error fetching questions:", error);
+                    alert(`Failed to load questions. ${error.message}`);
+                } finally {
+                    toggleLoading(false); // Hide "Processing..." message
+                }
+            }
+
+            // Render questions dynamically
+            function renderQuestions(questions) {
+                const container = document.getElementById('questions-container');
+                container.innerHTML = '';
+
+                questions.forEach((question, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+
+                    // Question text
+                    const questionLabel = document.createElement('label');
+                    questionLabel.innerHTML = `<strong>${question.question}</strong>`;
+                    card.appendChild(questionLabel);
+
+                    // Answer options or Essay Answer
+                    if (question.options) { // Multiple Choice
+                        const optionsDiv = document.createElement('div');
+                        question.options.forEach(option => {
+                            const optionText = document.createElement('p');
+                            optionText.textContent = option;
+                            if (option === question.answer) {
+                                optionText.classList.add('highlight');
+                            }
+                            optionsDiv.appendChild(optionText);
+                        });
+                        card.appendChild(optionsDiv);
+                    } else { // Essay
+                        const essayAnswer = document.createElement('p');
+                        essayAnswer.innerHTML = `<strong>Answer:</strong> ${question.answer}`;
+                        card.appendChild(essayAnswer);
+                    }
+
+                    // Explanation (if any)
+                    if (question.explanation) {
+                        const explanation = document.createElement('p');
+                        explanation.innerHTML = `<strong>Explanation:</strong> ${question.explanation}`;
+                        card.appendChild(explanation);
+                    }
+
+                    // Difficulty dropdown
+                    const difficultySection = document.createElement('div');
+                    difficultySection.className = 'difficulty-section';
+                    difficultySection.innerHTML = `
+                        <label for="difficulty${index}">Difficulty:</label>
+                        <select id="difficulty${index}" name="difficulty[${index}]">
+                            ${[...Array(10).keys()].map(i => `<option value="${i + 1}">${i + 1}</option>`).join('')}
+                        </select>
+                    `;
+                    card.appendChild(difficultySection);
+
+                    // Checkbox for question selection
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'selected_questions[]';
+                    checkbox.value = index;
+                    card.appendChild(checkbox);
+
+                    const checkboxLabel = document.createElement('label');
+                    checkboxLabel.textContent = ' Import this question';
+                    card.appendChild(checkboxLabel);
+
+                    // Hidden question details
+                    card.innerHTML += `
+                        <input type="hidden" name="questions[${index}][question]" value="${question.question}">
+                        <input type="hidden" name="questions[${index}][question_spring_id]" value="${question.question_id}">
+                        ${question.options
+                            ? question.options.map((opt, i) => `
+                                <input type="hidden" name="questions[${index}][answers][${i}][description]" value="${opt}">
+                                <input type="hidden" name="questions[${index}][answers][${i}][isright]" value="${opt === question.answer}">
+                            `).join('')
+                            : `<input type="hidden" name="questions[${index}][answers][0][description]" value="${question.answer}">
+                               <input type="hidden" name="questions[${index}][answers][0][isright]" value="true">`}
+                    `;
+
+                    container.appendChild(card);
+                });
+            }
+
+            // Initial fetch
+            fetchQuestions();
+        });
+    </script>
+</body>
 
 
+</html>
+
+
+<?php
 require_once('../code/tce_page_footer.php');
+?>

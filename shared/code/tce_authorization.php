@@ -409,7 +409,7 @@ if (isset($_POST['logaction']) && $_POST['logaction'] == 'login' && isset($_POST
                             $_SESSION['session_last_visit'] = isset($_COOKIE['LastVisit']) ? (int) $_COOKIE['LastVisit'] : 0;
 
                             // Hit the authentication endpoint API
-                            $authApiUrl = "http://34.27.150.5:8080/api/v1/user/auth";
+                            $authApiUrl = "http://localhost:8080/api/v1/user/auth";
                             $authPayload = [
                                 "username" => $username,
                                 "password" => $password
@@ -495,7 +495,7 @@ if (isset($_POST['logaction']) && $_POST['logaction'] == 'login' && isset($_POST
                                 'role' => $spring_role
                             ];
 
-                            $apiUrl = 'http://34.27.150.5:8080/api/v1/user';
+                            $apiUrl = 'http://localhost:8080/api/v1/user';
 
                             $ch = curl_init();
                             curl_setopt($ch, CURLOPT_URL, $apiUrl);
