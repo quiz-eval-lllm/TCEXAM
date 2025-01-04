@@ -221,6 +221,9 @@ if (isset($_POST['lock'])) {
     $menu_mode = 'unlock';
 }
 
+
+$baseTestLink = "http://34.66.224.44/tcexam/public/code/tce_test_start.php"; # ini nanti diganti pake link deploy
+
 switch ($menu_mode) {
     case 'lock':{ // lock test by changing end date (subtract 1000 years)
         $sql = 'UPDATE ' . K_TABLE_TESTS . ' SET
@@ -1154,6 +1157,10 @@ if (isset($test_id) && $test_id > 0) {
 }
 
 F_submit_button('clear', $l['w_clear'], $l['h_clear']);
+if (isset($test_id) && $test_id > 0) {
+    F_submit_button('copy_test_link', 'Copy Test Link', 'Copy the test link');
+}
+
 
 echo '<br /><br />' . K_NEWLINE;
 echo '</div>' . K_NEWLINE;
@@ -1436,11 +1443,29 @@ echo " if (document.getElementById('test_random_answers_select').checked==true){
 echo " if ((document.getElementById('test_random_answers_order').checked==false)&&(document.getElementById('test_random_answers_select').checked==true)){document.getElementById('test_random_answers_order').checked=true;}" . K_NEWLINE;
 echo ' if (document.getElementById(\'test_random_answers_order\').checked==false){document.getElementById(\'select_answers_order_mode\').style.visibility="visible";}else{document.getElementById(\'select_answers_order_mode\').style.visibility="hidden";}' . K_NEWLINE;
 echo '}' . K_NEWLINE;
+
+echo 'function JF_copy_test_link() {' . K_NEWLINE;
+echo " const testLink = '" . $baseTestLink . "?testid=" . $test_id . "';" . K_NEWLINE;
+echo ' navigator.clipboard.writeText(testLink)' . K_NEWLINE;
+echo ' .then(() => { alert("Test link copied to clipboard: " + testLink); })' . K_NEWLINE;
+echo ' .catch(err => { console.error("Failed to copy: ", err); });' . K_NEWLINE;
+echo '}' . K_NEWLINE;
+
+// Add event listener initialization
+echo 'document.addEventListener("DOMContentLoaded", function() {' . K_NEWLINE;
+echo ' const copyButton = document.getElementById("copy_test_link");' . K_NEWLINE;
+echo ' if (copyButton) {' . K_NEWLINE;
+echo ' copyButton.addEventListener("click", JF_copy_test_link);' . K_NEWLINE;
+echo ' }' . K_NEWLINE;
+echo '});' . K_NEWLINE;
+
 echo 'JF_check_random_boxes();' . K_NEWLINE;
 echo '//]]>' . K_NEWLINE;
 echo '</script>' . K_NEWLINE;
 
 require_once('../code/tce_page_footer.php');
+
+
 
 //============================================================+
 // END OF FILE
