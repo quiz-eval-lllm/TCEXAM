@@ -225,187 +225,187 @@ if (isset($_POST['lock'])) {
 $baseTestLink = "http://34.66.224.44/tcexam/public/code/tce_test_start.php"; # ini nanti diganti pake link deploy
 
 switch ($menu_mode) {
-    case 'lock':{ // lock test by changing end date (subtract 1000 years)
-        $sql = 'UPDATE ' . K_TABLE_TESTS . ' SET
+    case 'lock': { // lock test by changing end date (subtract 1000 years)
+            $sql = 'UPDATE ' . K_TABLE_TESTS . ' SET
 			test_end_time=' . F_empty_to_null('' . ((int) substr($test_end_time, 0, 1) - 1) . substr($test_end_time, 1)) . '
 			WHERE test_id=' . $test_id . '';
-        if (! $r = F_db_query($sql, $db)) {
-            F_display_db_error(false);
-        } else {
-            F_print_error('MESSAGE', $l['m_updated']);
+            if (! $r = F_db_query($sql, $db)) {
+                F_display_db_error(false);
+            } else {
+                F_print_error('MESSAGE', $l['m_updated']);
+            }
+
+            break;
         }
 
-        break;
-    }
-
-    case 'unlock':{ // unlock test by restoring original end date (add 1000 years)
-        $sql = 'UPDATE ' . K_TABLE_TESTS . ' SET
+    case 'unlock': { // unlock test by restoring original end date (add 1000 years)
+            $sql = 'UPDATE ' . K_TABLE_TESTS . ' SET
 			test_end_time=' . F_empty_to_null('' . ((int) substr($test_end_time, 0, 1) + 1) . substr($test_end_time, 1)) . '
 			WHERE test_id=' . $test_id . '';
-        if (! $r = F_db_query($sql, $db)) {
-            F_display_db_error(false);
-        } else {
-            F_print_error('MESSAGE', $l['m_updated']);
-        }
+            if (! $r = F_db_query($sql, $db)) {
+                F_display_db_error(false);
+            } else {
+                F_print_error('MESSAGE', $l['m_updated']);
+            }
 
-        break;
-    }
-
-    case 'deletesubject':{ // delete subject
-        // check referential integrity (NOTE: mysql do not support "ON UPDATE" constraint)
-        if (! F_check_unique(K_TABLE_TEST_USER, 'testuser_test_id=' . $test_id . '')) {
-            F_print_error('WARNING', $l['m_update_restrict']);
-            F_stripslashes_formfields();
             break;
         }
 
-        // for all selected subjects
-        for ($i = 0; $i < $subjcount; ++$i) {
-            if (! empty($_POST['selectsubject' . $i])) {
-                $sql = 'DELETE FROM ' . K_TABLE_TEST_SUBJSET . ' WHERE tsubset_test_id=' . $test_id . ' AND tsubset_id=' . $_POST['selectsubject' . $i] . '';
-                if (! $r = F_db_query($sql, $db)) {
-                    F_display_db_error(false);
-                } else {
-                    F_print_error('MESSAGE', $l['m_deleted']);
+    case 'deletesubject': { // delete subject
+            // check referential integrity (NOTE: mysql do not support "ON UPDATE" constraint)
+            if (! F_check_unique(K_TABLE_TEST_USER, 'testuser_test_id=' . $test_id . '')) {
+                F_print_error('WARNING', $l['m_update_restrict']);
+                F_stripslashes_formfields();
+                break;
+            }
+
+            // for all selected subjects
+            for ($i = 0; $i < $subjcount; ++$i) {
+                if (! empty($_POST['selectsubject' . $i])) {
+                    $sql = 'DELETE FROM ' . K_TABLE_TEST_SUBJSET . ' WHERE tsubset_test_id=' . $test_id . ' AND tsubset_id=' . $_POST['selectsubject' . $i] . '';
+                    if (! $r = F_db_query($sql, $db)) {
+                        F_display_db_error(false);
+                    } else {
+                        F_print_error('MESSAGE', $l['m_deleted']);
+                    }
                 }
             }
-        }
 
-        break;
-    }
-
-    case 'addquestion':{ // Add question type
-        // check referential integrity (NOTE: mysql do not support "ON UPDATE" constraint)
-        if (! F_check_unique(K_TABLE_TEST_USER, 'testuser_test_id=' . $test_id . '')) {
-            F_print_error('WARNING', $l['m_update_restrict']);
-            $formstatus = false;
-            F_stripslashes_formfields();
             break;
         }
 
-        if (($formstatus = F_check_form_fields()) && (isset($subject_id) && ! empty($subject_id) && isset($tsubset_quantity))) {
-            if ($tsubset_type == 3) {
-                // free-text questions do not have alternative answers to display
-                $tsubset_answers = 0;
-            } elseif ($tsubset_answers < 2 && $tsubset_difficulty > 0) {
-                // questions must have at least 2 alternative answers
-                $tsubset_answers = 2;
+    case 'addquestion': { // Add question type
+            // check referential integrity (NOTE: mysql do not support "ON UPDATE" constraint)
+            if (! F_check_unique(K_TABLE_TEST_USER, 'testuser_test_id=' . $test_id . '')) {
+                F_print_error('WARNING', $l['m_update_restrict']);
+                $formstatus = false;
+                F_stripslashes_formfields();
+                break;
             }
 
-            // create a comma separated list of subjects IDs
-            $subjids = '';
-            foreach ($subject_id as $subid) {
-                if ($subid[0] == '#') {
-                    // module ID
-                    $modid = (int) substr($subid, 1);
-                    $sqlsm = F_select_subjects_sql('subject_module_id=' . $modid . '');
-                    if ($rsm = F_db_query($sqlsm, $db)) {
-                        while ($msm = F_db_fetch_array($rsm)) {
-                            $subjids .= $msm['subject_id'] . ',';
+            if (($formstatus = F_check_form_fields()) && (isset($subject_id) && ! empty($subject_id) && isset($tsubset_quantity))) {
+                if ($tsubset_type == 3) {
+                    // free-text questions do not have alternative answers to display
+                    $tsubset_answers = 0;
+                } elseif ($tsubset_answers < 2 && $tsubset_difficulty > 0) {
+                    // questions must have at least 2 alternative answers
+                    $tsubset_answers = 2;
+                }
+
+                // create a comma separated list of subjects IDs
+                $subjids = '';
+                foreach ($subject_id as $subid) {
+                    if ($subid[0] == '#') {
+                        // module ID
+                        $modid = (int) substr($subid, 1);
+                        $sqlsm = F_select_subjects_sql('subject_module_id=' . $modid . '');
+                        if ($rsm = F_db_query($sqlsm, $db)) {
+                            while ($msm = F_db_fetch_array($rsm)) {
+                                $subjids .= $msm['subject_id'] . ',';
+                            }
+                        } else {
+                            F_display_db_error();
                         }
                     } else {
-                        F_display_db_error();
+                        $subjids .= (int) $subid . ',';
                     }
-                } else {
-                    $subjids .= (int) $subid . ',';
                 }
-            }
 
-            $subjids = substr($subjids, 0, -1);
-            $subject_id = explode(',', $subjids);
-            $subjids = '(' . $subjids . ')';
-            $sql_answer_position = '';
-            $sql_questions_position = '';
-            if (! $test_random_questions_order && $test_questions_order_mode == 0) {
-                $sql_questions_position = ' AND question_position>0';
-            }
+                $subjids = substr($subjids, 0, -1);
+                $subject_id = explode(',', $subjids);
+                $subjids = '(' . $subjids . ')';
+                $sql_answer_position = '';
+                $sql_questions_position = '';
+                if (! $test_random_questions_order && $test_questions_order_mode == 0) {
+                    $sql_questions_position = ' AND question_position>0';
+                }
 
-            if (! $test_random_answers_order && $test_answers_order_mode == 0) {
-                $sql_answer_position = ' AND answer_position>0';
-            }
+                if (! $test_random_answers_order && $test_answers_order_mode == 0) {
+                    $sql_answer_position = ' AND answer_position>0';
+                }
 
-            // check here if the selected number of questions are available for the current set
-            // NOTE: if the same subject is used in multiple sets this control may fail.
-            $sqlq = 'SELECT COUNT(*) AS numquestions FROM ' . K_TABLE_QUESTIONS . '';
-            $sqlq .= ' WHERE question_subject_id IN ' . $subjids . '
+                // check here if the selected number of questions are available for the current set
+                // NOTE: if the same subject is used in multiple sets this control may fail.
+                $sqlq = 'SELECT COUNT(*) AS numquestions FROM ' . K_TABLE_QUESTIONS . '';
+                $sqlq .= ' WHERE question_subject_id IN ' . $subjids . '
 					AND question_difficulty=' . $tsubset_difficulty . '
 					AND question_enabled=\'1\'';
-            if ($tsubset_type > 0) {
-                $sqlq .= ' AND question_type=' . $tsubset_type . '';
-            }
+                if ($tsubset_type > 0) {
+                    $sqlq .= ' AND question_type=' . $tsubset_type . '';
+                }
 
-            if ($tsubset_type == 1) {
-                // single question (MCSA)
-                // check if the selected question has enough answers
-                $sqlq .= ' AND question_id IN (
+                if ($tsubset_type == 1) {
+                    // single question (MCSA)
+                    // check if the selected question has enough answers
+                    $sqlq .= ' AND question_id IN (
 							SELECT answer_question_id
 							FROM ' . K_TABLE_ANSWERS . '
 							WHERE answer_enabled=\'1\' AND answer_isright=\'1\'';
-                $sqlq .= $sql_answer_position;
-                $sqlq .= ' GROUP BY answer_question_id
+                    $sqlq .= $sql_answer_position;
+                    $sqlq .= ' GROUP BY answer_question_id
 							HAVING (COUNT(answer_id)>0))';
-                $sqlq .= ' AND question_id IN (
+                    $sqlq .= ' AND question_id IN (
 							SELECT answer_question_id
 							FROM ' . K_TABLE_ANSWERS . '
 							WHERE answer_enabled=\'1\'
 							AND answer_isright=\'0\'';
-                $sqlq .= $sql_answer_position;
-                $sqlq .= ' GROUP BY answer_question_id';
-                if ($tsubset_answers > 0) {
-                    $sqlq .= ' HAVING (COUNT(answer_id)>=' . ($tsubset_answers - 1) . ')';
-                }
+                    $sqlq .= $sql_answer_position;
+                    $sqlq .= ' GROUP BY answer_question_id';
+                    if ($tsubset_answers > 0) {
+                        $sqlq .= ' HAVING (COUNT(answer_id)>=' . ($tsubset_answers - 1) . ')';
+                    }
 
-                $sqlq .= ' )';
-            } elseif ($tsubset_type == 2) {
-                // multiple question (MCMA)
-                // check if the selected question has enough answers
-                $sqlq .= ' AND question_id IN (
+                    $sqlq .= ' )';
+                } elseif ($tsubset_type == 2) {
+                    // multiple question (MCMA)
+                    // check if the selected question has enough answers
+                    $sqlq .= ' AND question_id IN (
 							SELECT answer_question_id
 							FROM ' . K_TABLE_ANSWERS . '
 							WHERE answer_enabled=\'1\'';
-                $sqlq .= $sql_answer_position;
-                $sqlq .= ' GROUP BY answer_question_id';
-                if ($tsubset_answers > 0) {
-                    $sqlq .= ' HAVING (COUNT(answer_id)>=' . $tsubset_answers . ')';
-                }
+                    $sqlq .= $sql_answer_position;
+                    $sqlq .= ' GROUP BY answer_question_id';
+                    if ($tsubset_answers > 0) {
+                        $sqlq .= ' HAVING (COUNT(answer_id)>=' . $tsubset_answers . ')';
+                    }
 
-                $sqlq .= ' )';
-            } elseif ($tsubset_type == 4) {
-                // ordering question
-                // check if the selected question has enough answers
-                $sqlq .= ' AND question_id IN (
+                    $sqlq .= ' )';
+                } elseif ($tsubset_type == 4) {
+                    // ordering question
+                    // check if the selected question has enough answers
+                    $sqlq .= ' AND question_id IN (
 							SELECT answer_question_id
 							FROM ' . K_TABLE_ANSWERS . '
 							WHERE answer_enabled=\'1\'
 							AND answer_position>0
 							GROUP BY answer_question_id
 							HAVING (COUNT(answer_id)>1))';
-            }
-
-            $sqlq .= $sql_questions_position;
-            if (K_DATABASE_TYPE == 'ORACLE') {
-                $sqlq = 'SELECT * FROM (' . $sqlq . ') WHERE rownum <= ' . $tsubset_quantity . '';
-            } else {
-                $sqlq .= ' LIMIT ' . $tsubset_quantity . '';
-            }
-
-            $numofrows = 0;
-            if ($rq = F_db_query($sqlq, $db)) {
-                if ($mq = F_db_fetch_array($rq)) {
-                    $numofrows = $mq['numquestions'];
                 }
-            } else {
-                F_display_db_error();
-            }
 
-            if ($numofrows < $tsubset_quantity) {
-                F_print_error('WARNING', $l['m_unavailable_questions']);
-                break;
-            }
+                $sqlq .= $sql_questions_position;
+                if (K_DATABASE_TYPE == 'ORACLE') {
+                    $sqlq = 'SELECT * FROM (' . $sqlq . ') WHERE rownum <= ' . $tsubset_quantity . '';
+                } else {
+                    $sqlq .= ' LIMIT ' . $tsubset_quantity . '';
+                }
 
-            if ($subject_id !== []) {
-                // insert new subject
-                $sql = 'INSERT INTO ' . K_TABLE_TEST_SUBJSET . ' (tsubset_test_id,
+                $numofrows = 0;
+                if ($rq = F_db_query($sqlq, $db)) {
+                    if ($mq = F_db_fetch_array($rq)) {
+                        $numofrows = $mq['numquestions'];
+                    }
+                } else {
+                    F_display_db_error();
+                }
+
+                if ($numofrows < $tsubset_quantity) {
+                    F_print_error('WARNING', $l['m_unavailable_questions']);
+                    break;
+                }
+
+                if ($subject_id !== []) {
+                    // insert new subject
+                    $sql = 'INSERT INTO ' . K_TABLE_TEST_SUBJSET . ' (tsubset_test_id,
 						tsubset_type,
 						tsubset_difficulty,
 						tsubset_quantity,
@@ -417,102 +417,102 @@ switch ($menu_mode) {
 						\'' . $tsubset_quantity . '\',
 						\'' . $tsubset_answers . '\'
 						)';
-                if (! $r = F_db_query($sql, $db)) {
-                    F_display_db_error(false);
-                } else {
-                    $tsubset_id = F_db_insert_id($db, K_TABLE_TEST_SUBJSET, 'tsubset_id');
-                    // add selected subject_id
-                    foreach ($subject_id as $subid) {
-                        $sql = 'INSERT INTO ' . K_TABLE_SUBJECT_SET . ' (
+                    if (! $r = F_db_query($sql, $db)) {
+                        F_display_db_error(false);
+                    } else {
+                        $tsubset_id = F_db_insert_id($db, K_TABLE_TEST_SUBJSET, 'tsubset_id');
+                        // add selected subject_id
+                        foreach ($subject_id as $subid) {
+                            $sql = 'INSERT INTO ' . K_TABLE_SUBJECT_SET . ' (
 								subjset_tsubset_id,
 								subjset_subject_id
 								) VALUES (
 								\'' . $tsubset_id . '\',
 								\'' . $subid . '\'
 								)';
-                        if (! $r = F_db_query($sql, $db)) {
-                            F_display_db_error(false);
+                            if (! $r = F_db_query($sql, $db)) {
+                                F_display_db_error(false);
+                            }
                         }
                     }
                 }
             }
-        }
 
-        break;
-    }
-
-    case 'delete':{
-        F_stripslashes_formfields();        // ask confirmation
-        F_print_error('WARNING', $l['m_delete_confirm_test']);
-        ?>
-        <div class="confirmbox">
-        <form action="<?php echo $_SERVER['SCRIPT_NAME']; ?>" method="post" enctype="multipart/form-data" id="form_delete">
-        <div>
-        <input type="hidden" name="test_id" id="test_id" value="<?php echo $test_id; ?>" />
-        <input type="hidden" name="test_name" id="test_name" value="<?php echo $test_name; ?>" />
-        <?php
-        F_submit_button('forcedelete', $l['w_delete'], $l['h_delete']);
-        F_submit_button('cancel', $l['w_cancel'], $l['h_cancel']);
-        echo F_getCSRFTokenField() . K_NEWLINE;
-        ?>
-        </div>
-        </form>
-        </div>
-        <?php
-        break;
-    }
-
-    case 'forcedelete':{
-        F_stripslashes_formfields(); // Delete
-        if ($forcedelete == $l['w_delete']) { //check if delete button has been pushed (redundant check)
-            // delete test
-            $sql = 'DELETE FROM ' . K_TABLE_TESTS . ' WHERE test_id=' . $test_id . '';
-            if (! $r = F_db_query($sql, $db)) {
-                F_display_db_error(false);
-            } else {
-                $test_id = false;
-                F_print_error('MESSAGE', $test_name . ': ' . $l['m_deleted']);
-            }
-        }
-
-        break;
-    }
-
-    case 'update':{ // Update
-        // check if the confirmation chekbox has been selected
-        if (! isset($_REQUEST['confirmupdate']) || $_REQUEST['confirmupdate'] != 1) {
-            F_print_error('WARNING', $l['m_form_missing_fields'] . ': ' . $l['w_confirm'] . ' &rarr; ' . $l['w_update']);
-            $formstatus = false;
-            F_stripslashes_formfields();
             break;
         }
 
-        if ($formstatus = F_check_form_fields()) {
-            // check referential integrity (NOTE: mysql do not support "ON UPDATE" constraint)
-            if (! F_check_unique(K_TABLE_TEST_USER, 'testuser_test_id=' . $test_id . '')) {
-                F_print_error('WARNING', $l['m_update_restrict']);
+    case 'delete': {
+            F_stripslashes_formfields();        // ask confirmation
+            F_print_error('WARNING', $l['m_delete_confirm_test']);
+?>
+            <div class="confirmbox">
+                <form action="<?php echo $_SERVER['SCRIPT_NAME']; ?>" method="post" enctype="multipart/form-data" id="form_delete">
+                    <div>
+                        <input type="hidden" name="test_id" id="test_id" value="<?php echo $test_id; ?>" />
+                        <input type="hidden" name="test_name" id="test_name" value="<?php echo $test_name; ?>" />
+                        <?php
+                        F_submit_button('forcedelete', $l['w_delete'], $l['h_delete']);
+                        F_submit_button('cancel', $l['w_cancel'], $l['h_cancel']);
+                        echo F_getCSRFTokenField() . K_NEWLINE;
+                        ?>
+                    </div>
+                </form>
+            </div>
+<?php
+            break;
+        }
+
+    case 'forcedelete': {
+            F_stripslashes_formfields(); // Delete
+            if ($forcedelete == $l['w_delete']) { //check if delete button has been pushed (redundant check)
+                // delete test
+                $sql = 'DELETE FROM ' . K_TABLE_TESTS . ' WHERE test_id=' . $test_id . '';
+                if (! $r = F_db_query($sql, $db)) {
+                    F_display_db_error(false);
+                } else {
+                    $test_id = false;
+                    F_print_error('MESSAGE', $test_name . ': ' . $l['m_deleted']);
+                }
+            }
+
+            break;
+        }
+
+    case 'update': { // Update
+            // check if the confirmation chekbox has been selected
+            if (! isset($_REQUEST['confirmupdate']) || $_REQUEST['confirmupdate'] != 1) {
+                F_print_error('WARNING', $l['m_form_missing_fields'] . ': ' . $l['w_confirm'] . ' &rarr; ' . $l['w_update']);
                 $formstatus = false;
                 F_stripslashes_formfields();
                 break;
             }
 
-            // check if name is unique
-            if (! F_check_unique(K_TABLE_TESTS, "test_name='" . $test_name . "'", 'test_id', $test_id)) {
-                F_print_error('WARNING', $l['m_duplicate_name']);
-                $formstatus = false;
-                F_stripslashes_formfields();
-                break;
-            }
+            if ($formstatus = F_check_form_fields()) {
+                // check referential integrity (NOTE: mysql do not support "ON UPDATE" constraint)
+                if (! F_check_unique(K_TABLE_TEST_USER, 'testuser_test_id=' . $test_id . '')) {
+                    F_print_error('WARNING', $l['m_update_restrict']);
+                    $formstatus = false;
+                    F_stripslashes_formfields();
+                    break;
+                }
 
-            if (! empty($new_test_password)) {
-                $test_password = getPasswordHash($new_test_password);
-            }
+                // check if name is unique
+                if (! F_check_unique(K_TABLE_TESTS, "test_name='" . $test_name . "'", 'test_id', $test_id)) {
+                    F_print_error('WARNING', $l['m_duplicate_name']);
+                    $formstatus = false;
+                    F_stripslashes_formfields();
+                    break;
+                }
 
-            if ($test_score_threshold > $test_max_score) {
-                $test_score_threshold = 0.6 * $test_max_score;
-            }
+                if (! empty($new_test_password)) {
+                    $test_password = getPasswordHash($new_test_password);
+                }
 
-            $sql = 'UPDATE ' . K_TABLE_TESTS . ' SET
+                if ($test_score_threshold > $test_max_score) {
+                    $test_score_threshold = 0.6 * $test_max_score;
+                }
+
+                $sql = 'UPDATE ' . K_TABLE_TESTS . ' SET
 				test_name=\'' . F_escape_sql($db, $test_name) . '\',
 				test_description=\'' . F_escape_sql($db, $test_description) . '\',
 				test_begin_time=' . F_empty_to_null($test_begin_time) . ',
@@ -541,82 +541,82 @@ switch ($menu_mode) {
 				test_logout_on_timeout=\'' . (int) $test_logout_on_timeout . '\',
 				test_password=' . F_empty_to_null($test_password) . '
 				WHERE test_id=' . $test_id . '';
-            if (! $r = F_db_query($sql, $db)) {
-                F_display_db_error(false);
-            } else {
-                F_print_error('MESSAGE', $l['m_updated']);
-            }
+                if (! $r = F_db_query($sql, $db)) {
+                    F_display_db_error(false);
+                } else {
+                    F_print_error('MESSAGE', $l['m_updated']);
+                }
 
-            // delete previous groups
-            $sql = 'DELETE FROM ' . K_TABLE_TEST_GROUPS . '
+                // delete previous groups
+                $sql = 'DELETE FROM ' . K_TABLE_TEST_GROUPS . '
 				WHERE tstgrp_test_id=' . $test_id . '';
-            if (! $r = F_db_query($sql, $db)) {
-                F_display_db_error(false);
-            }
+                if (! $r = F_db_query($sql, $db)) {
+                    F_display_db_error(false);
+                }
 
-            // update authorized groups
-            if (! empty($user_groups)) {
-                foreach ($user_groups as $group_id) {
-                    $sql = 'INSERT INTO ' . K_TABLE_TEST_GROUPS . ' (
+                // update authorized groups
+                if (! empty($user_groups)) {
+                    foreach ($user_groups as $group_id) {
+                        $sql = 'INSERT INTO ' . K_TABLE_TEST_GROUPS . ' (
 						tstgrp_test_id,
 						tstgrp_group_id
 						) VALUES (
 						\'' . $test_id . '\',
 						\'' . (int) $group_id . '\'
 						)';
-                    if (! $r = F_db_query($sql, $db)) {
-                        F_display_db_error(false);
+                        if (! $r = F_db_query($sql, $db)) {
+                            F_display_db_error(false);
+                        }
                     }
                 }
-            }
 
-            // delete previous SSL certificates
-            $sql = 'DELETE FROM ' . K_TABLE_TEST_SSLCERTS . '
+                // delete previous SSL certificates
+                $sql = 'DELETE FROM ' . K_TABLE_TEST_SSLCERTS . '
 				WHERE tstssl_test_id=' . $test_id . '';
-            if (! $r = F_db_query($sql, $db)) {
-                F_display_db_error(false);
-            }
+                if (! $r = F_db_query($sql, $db)) {
+                    F_display_db_error(false);
+                }
 
-            // update authorized SSL certificates
-            if (! empty($sslcerts)) {
-                foreach ($sslcerts as $ssl_id) {
-                    $sql = 'INSERT INTO ' . K_TABLE_TEST_SSLCERTS . ' (
+                // update authorized SSL certificates
+                if (! empty($sslcerts)) {
+                    foreach ($sslcerts as $ssl_id) {
+                        $sql = 'INSERT INTO ' . K_TABLE_TEST_SSLCERTS . ' (
 						tstssl_test_id,
 						tstssl_ssl_id
 						) VALUES (
 						\'' . $test_id . '\',
 						\'' . (int) $ssl_id . '\'
 						)';
-                    if (! $r = F_db_query($sql, $db)) {
-                        F_display_db_error(false);
+                        if (! $r = F_db_query($sql, $db)) {
+                            F_display_db_error(false);
+                        }
                     }
                 }
             }
+
+            break;
         }
 
-        break;
-    }
+    case 'add': { // Add
+            if ($formstatus = F_check_form_fields()) {
+                // check if name is unique
+                if (! F_check_unique(K_TABLE_TESTS, "test_name='" . F_escape_sql($db, $test_name) . "'")) {
+                    F_print_error('WARNING', $l['m_duplicate_name']);
+                    $formstatus = false;
+                    F_stripslashes_formfields();
+                    break;
+                }
 
-    case 'add':{ // Add
-        if ($formstatus = F_check_form_fields()) {
-            // check if name is unique
-            if (! F_check_unique(K_TABLE_TESTS, "test_name='" . F_escape_sql($db, $test_name) . "'")) {
-                F_print_error('WARNING', $l['m_duplicate_name']);
-                $formstatus = false;
-                F_stripslashes_formfields();
-                break;
-            }
+                if (isset($test_id) && $test_id > 0) {
+                    // save previous test_id.
+                    $old_test_id = $test_id;
+                }
 
-            if (isset($test_id) && $test_id > 0) {
-                // save previous test_id.
-                $old_test_id = $test_id;
-            }
+                if (! empty($new_test_password)) {
+                    $test_password = getPasswordHash($new_test_password);
+                }
 
-            if (! empty($new_test_password)) {
-                $test_password = getPasswordHash($new_test_password);
-            }
-
-            $sql = 'INSERT INTO ' . K_TABLE_TESTS . ' (
+                $sql = 'INSERT INTO ' . K_TABLE_TESTS . ' (
 			test_name,
 				test_description,
 				test_begin_time,
@@ -675,53 +675,53 @@ switch ($menu_mode) {
 				\'' . (int) $test_logout_on_timeout . '\',
 				' . F_empty_to_null($test_password) . '
 				)';
-            if (! $r = F_db_query($sql, $db)) {
-                F_display_db_error(false);
-            } else {
-                $test_id = F_db_insert_id($db, K_TABLE_TESTS, 'test_id');
-            }
+                if (! $r = F_db_query($sql, $db)) {
+                    F_display_db_error(false);
+                } else {
+                    $test_id = F_db_insert_id($db, K_TABLE_TESTS, 'test_id');
+                }
 
-            // add authorized user's groups
-            if (! empty($user_groups)) {
-                foreach ($user_groups as $group_id) {
-                    $sql = 'INSERT INTO ' . K_TABLE_TEST_GROUPS . ' (
+                // add authorized user's groups
+                if (! empty($user_groups)) {
+                    foreach ($user_groups as $group_id) {
+                        $sql = 'INSERT INTO ' . K_TABLE_TEST_GROUPS . ' (
 						tstgrp_test_id,
 						tstgrp_group_id
 						) VALUES (
 						\'' . $test_id . '\',
 						\'' . (int) $group_id . '\'
 						)';
-                    if (! $r = F_db_query($sql, $db)) {
-                        F_display_db_error(false);
+                        if (! $r = F_db_query($sql, $db)) {
+                            F_display_db_error(false);
+                        }
                     }
                 }
-            }
 
-            // update authorized SSL certificates
-            if (! empty($sslcerts)) {
-                foreach ($sslcerts as $ssl_id) {
-                    $sql = 'INSERT INTO ' . K_TABLE_TEST_SSLCERTS . ' (
+                // update authorized SSL certificates
+                if (! empty($sslcerts)) {
+                    foreach ($sslcerts as $ssl_id) {
+                        $sql = 'INSERT INTO ' . K_TABLE_TEST_SSLCERTS . ' (
 						tstssl_test_id,
 						tstssl_ssl_id
 						) VALUES (
 						\'' . $test_id . '\',
 						\'' . (int) $ssl_id . '\'
 						)';
-                    if (! $r = F_db_query($sql, $db)) {
-                        F_display_db_error(false);
+                        if (! $r = F_db_query($sql, $db)) {
+                            F_display_db_error(false);
+                        }
                     }
                 }
-            }
 
-            if (isset($old_test_id) && $old_test_id > 0) {
-                // copy here previous selected questions to this new test
-                $sql = 'SELECT *
+                if (isset($old_test_id) && $old_test_id > 0) {
+                    // copy here previous selected questions to this new test
+                    $sql = 'SELECT *
 					FROM ' . K_TABLE_TEST_SUBJSET . '
 					WHERE tsubset_test_id=\'' . $old_test_id . "'";
-                if ($r = F_db_query($sql, $db)) {
-                    while ($m = F_db_fetch_array($r)) {
-                        // insert new subject
-                        $sqlu = 'INSERT INTO ' . K_TABLE_TEST_SUBJSET . ' (
+                    if ($r = F_db_query($sql, $db)) {
+                        while ($m = F_db_fetch_array($r)) {
+                            // insert new subject
+                            $sqlu = 'INSERT INTO ' . K_TABLE_TEST_SUBJSET . ' (
 							tsubset_test_id,
 							tsubset_type,
 							tsubset_difficulty,
@@ -734,74 +734,74 @@ switch ($menu_mode) {
 							\'' . $m['tsubset_quantity'] . '\',
 							\'' . $m['tsubset_answers'] . '\'
 							)';
-                        if (! $ru = F_db_query($sqlu, $db)) {
-                            F_display_db_error();
-                        } else {
-                            $tsubset_id = F_db_insert_id($db, K_TABLE_TEST_SUBJSET, 'tsubset_id');
-                            $sqls = 'SELECT *
+                            if (! $ru = F_db_query($sqlu, $db)) {
+                                F_display_db_error();
+                            } else {
+                                $tsubset_id = F_db_insert_id($db, K_TABLE_TEST_SUBJSET, 'tsubset_id');
+                                $sqls = 'SELECT *
 								FROM ' . K_TABLE_SUBJECT_SET . '
 								WHERE subjset_tsubset_id=\'' . $m['tsubset_id'] . "'";
-                            if ($rs = F_db_query($sqls, $db)) {
-                                while ($ms = F_db_fetch_array($rs)) {
-                                    $sqlp = 'INSERT INTO ' . K_TABLE_SUBJECT_SET . ' (
+                                if ($rs = F_db_query($sqls, $db)) {
+                                    while ($ms = F_db_fetch_array($rs)) {
+                                        $sqlp = 'INSERT INTO ' . K_TABLE_SUBJECT_SET . ' (
 										subjset_tsubset_id,
 										subjset_subject_id
 										) VALUES (
 										\'' . $tsubset_id . '\',
 										\'' . $ms['subjset_subject_id'] . '\'
 										)';
-                                    if (! $rp = F_db_query($sqlp, $db)) {
-                                        F_display_db_error();
+                                        if (! $rp = F_db_query($sqlp, $db)) {
+                                            F_display_db_error();
+                                        }
                                     }
+                                } else {
+                                    F_display_db_error();
                                 }
-                            } else {
-                                F_display_db_error();
                             }
                         }
+                    } else {
+                        F_display_db_error();
                     }
-                } else {
-                    F_display_db_error();
                 }
             }
+
+            break;
         }
 
-        break;
-    }
+    case 'clear': { // Clear form fields
+            $test_name = '';
+            $test_description = '';
+            $test_begin_time = date(K_TIMESTAMP_FORMAT);
+            $test_end_time = date(K_TIMESTAMP_FORMAT, time() + K_SECONDS_IN_DAY);
+            $test_duration_time = 60;
+            $test_ip_range = '*.*.*.*';
+            $test_results_to_users = false;
+            $test_report_to_users = false;
+            $test_score_right = 1;
+            $test_score_wrong = 0;
+            $test_score_unanswered = 0;
+            $test_max_score = 0;
+            $test_score_threshold = 0;
+            $test_random_questions_select = true;
+            $test_random_questions_order = true;
+            $test_questions_order_mode = 0;
+            $test_random_answers_select = true;
+            $test_random_answers_order = true;
+            $test_answers_order_mode = 0;
+            $test_comment_enabled = true;
+            $test_menu_enabled = true;
+            $test_noanswer_enabled = true;
+            $test_mcma_radio = true;
+            $test_repeatable = 0;
+            $test_mcma_partial_score = true;
+            $test_logout_on_timeout = false;
+            $test_password = '';
+            break;
+        }
 
-    case 'clear':{ // Clear form fields
-        $test_name = '';
-        $test_description = '';
-        $test_begin_time = date(K_TIMESTAMP_FORMAT);
-        $test_end_time = date(K_TIMESTAMP_FORMAT, time() + K_SECONDS_IN_DAY);
-        $test_duration_time = 60;
-        $test_ip_range = '*.*.*.*';
-        $test_results_to_users = false;
-        $test_report_to_users = false;
-        $test_score_right = 1;
-        $test_score_wrong = 0;
-        $test_score_unanswered = 0;
-        $test_max_score = 0;
-        $test_score_threshold = 0;
-        $test_random_questions_select = true;
-        $test_random_questions_order = true;
-        $test_questions_order_mode = 0;
-        $test_random_answers_select = true;
-        $test_random_answers_order = true;
-        $test_answers_order_mode = 0;
-        $test_comment_enabled = true;
-        $test_menu_enabled = true;
-        $test_noanswer_enabled = true;
-        $test_mcma_radio = true;
-        $test_repeatable = 0;
-        $test_mcma_partial_score = true;
-        $test_logout_on_timeout = false;
-        $test_password = '';
-        break;
-    }
-
-    default:{
-        break;
-    }
+    default: {
+            break;
+        }
 } //end of switch
 
 // --- Initialize variables
@@ -1156,9 +1156,14 @@ if (isset($test_id) && $test_id > 0) {
     }
 }
 
+
 F_submit_button('clear', $l['w_clear'], $l['h_clear']);
 if (isset($test_id) && $test_id > 0) {
-    F_submit_button('copy_test_link', 'Copy Test Link', 'Copy the test link');
+    // Add a button to show the test link
+    echo '<div id="link_display_section" style="margin-top: 10px;">';
+    echo '<button id="show_test_link" type="button" title="Display the test link">Show Test Link</button>';
+    echo '<div id="quiz_link_container" style="margin-top: 5px; font-size: 14px; color: #333;"></div>';
+    echo '</div>';
 }
 
 
@@ -1432,34 +1437,29 @@ echo '</div>' . K_NEWLINE;
 echo '<div class="pagehelp">' . $l['hp_edit_test'] . '</div>' . K_NEWLINE;
 echo '</div>' . K_NEWLINE;
 
-// javascript controls
+// JavaScript controls
 echo '<script type="text/javascript">' . K_NEWLINE;
 echo '//<![CDATA[' . K_NEWLINE;
-echo 'function JF_check_random_boxes() {' . K_NEWLINE;
-echo " if (document.getElementById('test_random_questions_select').checked==true){document.getElementById('test_random_questions_order').checked=true;}" . K_NEWLINE;
-echo " if ((document.getElementById('test_random_questions_order').checked==false)&&(document.getElementById('test_random_questions_select').checked==true)){document.getElementById('test_random_questions_order').checked=true;}" . K_NEWLINE;
-echo ' if (document.getElementById(\'test_random_questions_order\').checked==false){document.getElementById(\'select_questions_order_mode\').style.visibility="visible";}else{document.getElementById(\'select_questions_order_mode\').style.visibility="hidden";}' . K_NEWLINE;
-echo " if (document.getElementById('test_random_answers_select').checked==true){document.getElementById('test_random_answers_order').checked=true;}" . K_NEWLINE;
-echo " if ((document.getElementById('test_random_answers_order').checked==false)&&(document.getElementById('test_random_answers_select').checked==true)){document.getElementById('test_random_answers_order').checked=true;}" . K_NEWLINE;
-echo ' if (document.getElementById(\'test_random_answers_order\').checked==false){document.getElementById(\'select_answers_order_mode\').style.visibility="visible";}else{document.getElementById(\'select_answers_order_mode\').style.visibility="hidden";}' . K_NEWLINE;
-echo '}' . K_NEWLINE;
 
-echo 'function JF_copy_test_link() {' . K_NEWLINE;
+// Function to display the test link
+echo 'function JF_show_test_link() {' . K_NEWLINE;
 echo " const testLink = '" . $baseTestLink . "?testid=" . $test_id . "';" . K_NEWLINE;
-echo ' navigator.clipboard.writeText(testLink)' . K_NEWLINE;
-echo ' .then(() => { alert("Test link copied to clipboard: " + testLink); })' . K_NEWLINE;
-echo ' .catch(err => { console.error("Failed to copy: ", err); });' . K_NEWLINE;
+echo ' const linkContainer = document.getElementById("quiz_link_container");' . K_NEWLINE;
+echo ' if (linkContainer) {' . K_NEWLINE;
+echo '     linkContainer.innerHTML = `<strong>Quiz Link:</strong> <a href="${testLink}" target="_blank">${testLink}</a>`;' . K_NEWLINE;
+echo ' } else {' . K_NEWLINE;
+echo '     console.error("Quiz link container not found.");' . K_NEWLINE;
+echo ' }' . K_NEWLINE;
 echo '}' . K_NEWLINE;
 
-// Add event listener initialization
+// Event listener to handle the button click
 echo 'document.addEventListener("DOMContentLoaded", function() {' . K_NEWLINE;
-echo ' const copyButton = document.getElementById("copy_test_link");' . K_NEWLINE;
-echo ' if (copyButton) {' . K_NEWLINE;
-echo ' copyButton.addEventListener("click", JF_copy_test_link);' . K_NEWLINE;
+echo ' const showLinkButton = document.getElementById("show_test_link");' . K_NEWLINE;
+echo ' if (showLinkButton) {' . K_NEWLINE;
+echo '     showLinkButton.addEventListener("click", JF_show_test_link);' . K_NEWLINE;
 echo ' }' . K_NEWLINE;
 echo '});' . K_NEWLINE;
 
-echo 'JF_check_random_boxes();' . K_NEWLINE;
 echo '//]]>' . K_NEWLINE;
 echo '</script>' . K_NEWLINE;
 
