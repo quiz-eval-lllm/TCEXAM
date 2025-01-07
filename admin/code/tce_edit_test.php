@@ -222,7 +222,7 @@ if (isset($_POST['lock'])) {
 }
 
 
-$baseTestLink = "http://34.66.224.44/tcexam/public/code/tce_test_start.php"; # ini nanti diganti pake link deploy
+$baseTestLink = "http://34.66.224.44/public/code/tce_test_start.php"; # ini nanti diganti pake link deploy
 
 switch ($menu_mode) {
     case 'lock': { // lock test by changing end date (subtract 1000 years)
