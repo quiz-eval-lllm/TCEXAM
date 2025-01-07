@@ -133,37 +133,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
-            // // Deployment path
-            // $deploymentPath = '/var/www/html/uploads/';
-            // if (!is_dir($deploymentPath)) {
-            //     if (!mkdir($deploymentPath, 0777, true)) {
-            //         F_print_error('ERROR', 'Failed to create directory: ' . $deploymentPath, true);
-            //     }
-            // }
+            // Deployment path
+            $deploymentPath = '/var/www/html/uploads/';
+            if (!is_dir($deploymentPath)) {
+                if (!mkdir($deploymentPath, 0777, true)) {
+                    F_print_error('ERROR', 'Failed to create directory: ' . $deploymentPath, true);
+                }
+            }
 
 
-            // $permanentPath = $deploymentPath . $fileName;
+            $permanentPath = $deploymentPath . $fileName;
 
-            // if (!move_uploaded_file($tmpPath, $permanentPath)) {
-            //     F_print_error('ERROR', 'Failed to move uploaded file to: ' . $permanentPath . '. Check directory permissions.', true);
-            // }
-
-            // $fileType = mime_content_type($permanentPath);
-            // if ($fileType === false) {
-            //     F_print_error('ERROR', 'Could not determine MIME type for the file: ' . $permanentPath, true);
-            // }
-
-            $permanentPath = 'C:/xampp/tmp/' . $fileName;
-
-            // Move the file to a permanent location
             if (!move_uploaded_file($tmpPath, $permanentPath)) {
-                die("Failed to move uploaded file to: " . $permanentPath);
+                F_print_error('ERROR', 'Failed to move uploaded file to: ' . $permanentPath . '. Check directory permissions.', true);
             }
 
             $fileType = mime_content_type($permanentPath);
             if ($fileType === false) {
-                die("Could not determine MIME type for: $permanentPath");
+                F_print_error('ERROR', 'Could not determine MIME type for the file: ' . $permanentPath, true);
             }
+
+            // $permanentPath = 'C:/xampp/tmp/' . $fileName;
+
+            // // Move the file to a permanent location
+            // if (!move_uploaded_file($tmpPath, $permanentPath)) {
+            //     die("Failed to move uploaded file to: " . $permanentPath);
+            // }
+
+            // $fileType = mime_content_type($permanentPath);
+            // if ($fileType === false) {
+            //     die("Could not determine MIME type for: $permanentPath");
+            // }
 
 
             // Upload PDF endpoint
