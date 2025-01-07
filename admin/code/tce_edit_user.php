@@ -572,7 +572,7 @@ echo '<div class="tceformbox">' . K_NEWLINE;
 
 // Add the explanatory text with an outline
 echo '<div style="text-align: center; margin-bottom: 20px; padding: 10px; border: 1px solid #FF0000; background-color: #FFECEC; border-radius: 5px;">';
-echo '<span style="color: red; font-weight: bold;">Unable to add or remove user because user management is handled by SSO</span>';
+echo '<span style="color: red; font-weight: bold;">Unable to add or remove user because user management is handled by IAM</span>';
 echo '</div>';
 
 echo '<form action="' . $_SERVER['SCRIPT_NAME'] . '" method="post" enctype="multipart/form-data" id="form_usereditor">' . K_NEWLINE;

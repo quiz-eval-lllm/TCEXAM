@@ -167,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
             // Upload PDF endpoint
-            $url = "http://localhost:8080/api/v1/upload_pdf";
+            $url = "http://34.27.150.5:8080/api/v1/upload_pdf";
 
             // Initialize cURL
             $ch = curl_init();
@@ -316,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <div id="loading-message" style="display: none;">
-        <p>Please wait... Fetching questions from the server. This may take a moment.</p>
+        <p>Please wait... The system is fetching questions from the server. Kindly remain on this page as the process may take a moment.</p>
     </div>
     <form id="question-form" method="POST" action="process.php">
         <!-- Hidden inputs to pass the global data -->
@@ -334,7 +334,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const apiUrl = "http://localhost:8080/api/v1/quiz/package";
+            const apiUrl = "http://34.27.150.5:8080/api/v1/quiz/package";
             const loadingMessage = document.getElementById('loading-message');
             const submitButton = document.getElementById('submit-button');
             const questionsContainer = document.getElementById('questions-container');

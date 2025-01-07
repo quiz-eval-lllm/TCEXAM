@@ -341,6 +341,8 @@ if (isset($_POST['logaction']) && $_POST['logaction'] == 'login' && isset($_POST
             // <=================== NEW BRUTE FORCE METHOD ===================>
 
             // Authentication using Keycloak SSO service
+
+            // TODO: If normal login
             $testKeycloak = file_get_contents("http://34.121.202.21:8080");
 
             $keycloakUrl = "http://34.121.202.21:8080/realms/integrated-lms-quiz/protocol/openid-connect/token";
@@ -365,9 +367,11 @@ if (isset($_POST['logaction']) && $_POST['logaction'] == 'login' && isset($_POST
             $curlError = curl_error($ch);
             curl_close($ch);
 
+
             // Processing if the authentication success
             if ($httpCode == 200) {
                 $keycloakData = json_decode($response, true);
+
 
                 if (!empty($keycloakData['access_token'])) {
                     $accessToken = $keycloakData['access_token'];
@@ -409,7 +413,7 @@ if (isset($_POST['logaction']) && $_POST['logaction'] == 'login' && isset($_POST
                             $_SESSION['session_last_visit'] = isset($_COOKIE['LastVisit']) ? (int) $_COOKIE['LastVisit'] : 0;
 
                             // Hit the authentication endpoint API
-                            $authApiUrl = "http://localhost:8080/api/v1/user/auth";
+                            $authApiUrl = "http://34.27.150.5:8080/api/v1/user/auth";
                             $authPayload = [
                                 "username" => $username,
                                 "password" => $password
@@ -495,7 +499,7 @@ if (isset($_POST['logaction']) && $_POST['logaction'] == 'login' && isset($_POST
                                 'role' => $spring_role
                             ];
 
-                            $apiUrl = 'http://localhost:8080/api/v1/user';
+                            $apiUrl = 'http://34.27.150.5:8080/api/v1/user';
 
                             $ch = curl_init();
                             curl_setopt($ch, CURLOPT_URL, $apiUrl);
@@ -533,6 +537,8 @@ if (isset($_POST['logaction']) && $_POST['logaction'] == 'login' && isset($_POST
                     error_log('Session data: ' . print_r($_SESSION, true));
                     F_print_error('WARNING', $l['m_login_wrong']);
                 }
+
+                // if there is post examId param in the req, do redirect
             } else {
                 error_log('ERROR AUTH 1');
                 F_print_error('WARNING', $l['m_login_wrong']);

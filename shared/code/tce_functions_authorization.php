@@ -54,7 +54,7 @@ function F_loginForm($faction, $fid, $fmethod, $fenctype, $username)
 
 
     $str .= '<div class="tceformbox">' . K_NEWLINE;
-    $str .= '<div style="margin-bottom:10px; font-weight:bold; color:#555; border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#f9f9f9; text-align:center;">Single Sign-On for Integrated Learning Evaluation System</div>' . K_NEWLINE;
+    $str .= '<div style="margin-bottom:10px; font-weight:bold; color:#555; border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#f9f9f9; text-align:center;">IAM for Integrated Learning Evaluation System</div>' . K_NEWLINE;
     $str .= '<form action="' . $faction . '" method="' . $fmethod . '" id="' . $fid . '" enctype="' . $fenctype . '">' . K_NEWLINE;
     // user name
     $str .= getFormRowTextInput('xuser_name', $l['w_username'], $l['h_login_name'], '', $username, '', 255, false, false, false, '');
@@ -65,12 +65,9 @@ function F_loginForm($faction, $fid, $fmethod, $fenctype, $username)
         $str .= getFormRowTextInput('xuser_otpcode', $l['w_otpcode'], $l['h_otpcode'], '', '', '', 255, false, false, true, '');
     }
 
-    if (defined('K_PASSWORD_RESET') && K_PASSWORD_RESET) {
-        // print a link to password reset page
-        $str .= '<div class="row">' . K_NEWLINE;
-        $str .= '<span class="formw"><a href="../../public/code/tce_password_reset.php" title="' . $l['h_reset_password'] . '" style="font-size:90%;">' . $l['w_forgot_password'] . '</a></span>' . K_NEWLINE;
-        $str .= '</div>' . K_NEWLINE;
-    }
+
+
+    $str .= '</div>' . K_NEWLINE;
 
     // buttons
     $str .= '<div class="row">' . K_NEWLINE;
